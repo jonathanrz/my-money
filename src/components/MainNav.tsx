@@ -1,17 +1,17 @@
+import { Link } from "wouter";
 import { styled } from "@mui/material/styles";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ViewWeekIcon from "@mui/icons-material/ViewWeek";
+import ReceiptIcon from "@mui/icons-material/Receipt";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
-
-const drawerWidth = 240;
+import constants from "../constants";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -32,10 +32,10 @@ export default function MainNav({
   return (
     <Drawer
       sx={{
-        width: drawerWidth,
+        width: constants.drawerWidth,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: drawerWidth,
+          width: constants.drawerWidth,
           boxSizing: "border-box",
         },
       }}
@@ -50,14 +50,27 @@ export default function MainNav({
       </DrawerHeader>
       <Divider />
       <List>
-        {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
+        {[
+          {
+            text: "Resume",
+            href: "/",
+            Icon: ViewWeekIcon,
+          },
+          {
+            text: "Invoices",
+            href: "/invoices",
+            Icon: ReceiptIcon,
+          },
+        ].map((route) => (
+          <ListItem key={route.text} disablePadding>
+            <Link href={route.href}>
+              <ListItemButton>
+                <ListItemIcon>
+                  <route.Icon />
+                </ListItemIcon>
+                <ListItemText primary={route.text} />
+              </ListItemButton>
+            </Link>
           </ListItem>
         ))}
       </List>

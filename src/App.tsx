@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { Route } from "wouter";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import MainAppBar from "./components/MainAppBar";
 import MainNav from "./components/MainNav";
-
-const drawerWidth = 240;
+import ResumePage from "./pages/Resume";
+import InvoicesPage from "./pages/Invoices";
+import constants from "./constants";
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
   open?: boolean;
@@ -16,7 +18,7 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  marginLeft: `-${drawerWidth}px`,
+  marginLeft: `-${constants.drawerWidth}px`,
   ...(open && {
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.easeOut,
@@ -44,6 +46,9 @@ export default function App() {
       <MainNav open={open} handleDrawerClose={() => setOpen(false)} />
       <Main open={open}>
         <DrawerHeader />
+
+        <Route path="/invoices" component={InvoicesPage} />
+        <Route path="/" component={ResumePage} />
       </Main>
     </Box>
   );

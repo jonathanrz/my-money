@@ -4,8 +4,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-
-const drawerWidth = 240;
+import constants from "../constants";
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -19,8 +18,8 @@ const AppBar = styled(MuiAppBar, {
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
+    width: `calc(100% - ${constants.drawerWidth}px)`,
+    marginLeft: `${constants.drawerWidth}px`,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
@@ -48,7 +47,7 @@ export default function MainAppBar({
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap component="div">
-          Persistent drawer
+          My Money
         </Typography>
       </Toolbar>
     </AppBar>

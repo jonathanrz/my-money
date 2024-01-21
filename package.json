@@ -17,6 +17,7 @@
     "@mui/x-date-pickers": "^6.19.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "wouter": "^2.12.1",
     "yarn": "^1.22.21"
   },
   "devDependencies": {
