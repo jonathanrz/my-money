@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import ReceiptIcon from "@mui/icons-material/Receipt";
+import ImportExportIcon from "@mui/icons-material/ImportExport";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -60,6 +61,11 @@ export default function MainNav({
             text: "Invoices",
             href: "/invoices",
             Icon: ReceiptIcon,
+          },
+          {
+            text: "Import",
+            href: "/import",
+            Icon: ImportExportIcon,
           },
         ].map((route) => (
           <ListItem key={route.text} disablePadding>

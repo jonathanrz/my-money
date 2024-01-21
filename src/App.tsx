@@ -7,6 +7,7 @@ import MainAppBar from "./components/MainAppBar";
 import MainNav from "./components/MainNav";
 import ResumePage from "./pages/Resume";
 import InvoicesPage from "./pages/Invoices";
+import ImportPage from "./pages/Import";
 import constants from "./constants";
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
@@ -48,6 +49,7 @@ export default function App() {
         <DrawerHeader />
 
         <Route path="/invoices" component={InvoicesPage} />
+        <Route path="/import" component={ImportPage} />
         <Route path="/" component={ResumePage} />
       </Main>
     </Box>
