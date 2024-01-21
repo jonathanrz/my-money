@@ -1,5 +1,7 @@
+import InputDataForm from "./InputDataForm";
+
 function ImportPage() {
-  return <div>Import</div>;
+  return <InputDataForm />;
 }
 
 export default ImportPage;
