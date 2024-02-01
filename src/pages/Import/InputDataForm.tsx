@@ -1,16 +1,19 @@
 import { useFormik } from "formik";
 import { Button, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import type { InputDataFormValues } from "./models";
 
-function InputDataForm() {
+interface InputDataFormProps {
+  onSubmit: (values: InputDataFormValues) => void;
+}
+
+function InputDataForm({ onSubmit }: InputDataFormProps) {
   const formik = useFormik({
     initialValues: {
       token: "",
-      month: "",
+      month: null,
     },
-    onSubmit: (values) => {
-      console.log(JSON.stringify(values, null, 2));
-    },
+    onSubmit,
   });
 
   return (
