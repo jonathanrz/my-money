@@ -1,16 +1,8 @@
-import { Divider, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import dayjs, { Dayjs } from "dayjs";
 import InputDataForm from "./InputDataForm";
 import type { InputDataFormValues } from "./models";
 
 const URL = "https://myexpenses-api-phx-prd.herokuapp.com/api/expenses?";
-
-const Container = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(4),
-}));
 
 function ExpensesImport() {
   function getCreditCardId(ccName: string) {
@@ -24,11 +16,7 @@ function ExpensesImport() {
   async function insertExpenses(expenses: Array<any>, date: Dayjs) {
     for (let i = 0; i < expenses.length; i++) {
       const expense = expenses[i];
-      const isoDate = dayjs(expense.date)
-        .hour(-3)
-        .minute(0)
-        .second(0)
-        .millisecond(0);
+      const isoDate = dayjs(expense.date).hour(-3);
       const newExpense = {
         date: isoDate.toISOString(),
         name: expense.name,
@@ -70,13 +58,7 @@ function ExpensesImport() {
       .then((res) => insertExpenses(res.data, values.month!.add(1, "day")));
   }
 
-  return (
-    <Container>
-      <Typography variant="h4">Expenses</Typography>
-      <InputDataForm onSubmit={onSubmit} />
-      <Divider />
-    </Container>
-  );
+  return <InputDataForm onSubmit={onSubmit} />;
 }
 
 export default ExpensesImport;
