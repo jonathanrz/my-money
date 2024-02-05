@@ -1,1 +1,2 @@
-- Converter todas as datas pra ISO pra poder usar filtros
+- Retirar os expenses que são de CC, agrupar na fatura e mostrar a transação na coluna da conta
+- Esconder os confirmados

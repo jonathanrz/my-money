@@ -18,12 +18,16 @@
     "@mui/x-date-pickers": "^6.19.0",
     "dayjs": "^1.11.10",
     "formik": "^2.4.5",
+    "lodash": "^4.17.21",
+    "numbro": "^2.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-query": "^3.39.3",
     "wouter": "^2.12.1",
     "yarn": "^1.22.21"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
