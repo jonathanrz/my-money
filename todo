@@ -1,2 +1,3 @@
 - Retirar os expenses que são de CC, agrupar na fatura e mostrar a transação na coluna da conta
 - Esconder os confirmados
+- Escrever tipos e abstrair queries para retornar os tipos certos
