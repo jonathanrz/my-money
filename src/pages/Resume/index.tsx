@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { orderBy } from "lodash";
+import { orderBy, sumBy } from "lodash";
 import { useQuery } from "react-query";
 import dayjs from "dayjs";
 import {
@@ -10,6 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TableFooter,
   Paper,
 } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -152,6 +153,22 @@ function ResumePage() {
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell></TableCell>
+            {accountsAsync.data?.map((account) => (
+              <TableCell key={account.id} align="right">
+                {formatCurrency(
+                  account.balance -
+                    sumBy(
+                      expenses.filter((e: Expense) => e.account == account.id),
+                      "amount"
+                    )
+                )}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableFooter>
       </Table>
     </TableContainer>
   );
