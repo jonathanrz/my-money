@@ -6,9 +6,9 @@ const URL = "https://myexpenses-api-phx-prd.herokuapp.com/api/expenses?";
 
 function ExpensesImport() {
   function getCreditCardId(ccName: string) {
-    if (ccName === "Nubank") return 7;
-    if (ccName === "Bradesco") return 8;
-    if (ccName === "XP") return 9;
+    if (ccName === "Nubank") return "7";
+    if (ccName === "Bradesco") return "8";
+    if (ccName === "XP") return "9";
 
     console.error(`${ccName} not found`);
   }
@@ -20,15 +20,17 @@ function ExpensesImport() {
       const newExpense = {
         date: isoDate.toISOString(),
         name: expense.name,
-        account:
-          expense.account?.id || getCreditCardId(expense.credit_card?.name),
+        account_id:
+          expense.account?.id.toString() ||
+          getCreditCardId(expense.credit_card?.name) ||
+          null,
+        bill_id: expense.bill?.id.toString() || null,
         amount: expense.value,
         installment_count: expense.installmentCount,
         installment_number: expense.installmentNumber,
         installment_uuid: expense.installmentUUID,
         confirmed: expense.confirmed,
-        nubank_id: expense.nubank_id,
-        bill_id: expense.bill?.id,
+        nubank_id: expense.nubank_id || null,
       };
 
       await fetch(

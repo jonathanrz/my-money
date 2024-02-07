@@ -16,25 +16,13 @@ import {
 import CircularProgress from "@mui/material/CircularProgress";
 import constants from "../../constants";
 import formatCurrency from "../../helpers/formatCurrency";
+import { Expense } from "../../models";
 
-const BRADESCO_ACCOUNT_ID = 1;
-const NUCONTA_PJ_ACCOUNT_ID = 5;
-const NUBANK_CC_ID = 7;
-const BRADESCO_CC_ID = 8;
-const XP_CC_ID = 9;
-
-type Expense = {
-  id: string;
-  date: string;
-  name: string;
-  account: number | string;
-  amount: number;
-  installment_count: null | number;
-  installment_number: null | string;
-  installment_uuid: null | string;
-  confirmed: boolean;
-  nubank_id: string;
-};
+const BRADESCO_ACCOUNT_ID = "1";
+const NUCONTA_PJ_ACCOUNT_ID = "5";
+const NUBANK_CC_ID = "7";
+const BRADESCO_CC_ID = "8";
+const XP_CC_ID = "9";
 
 type AccountMappingAcc = {
   nubank: Array<Expense>;
@@ -45,14 +33,15 @@ type AccountMappingAcc = {
 
 function generateInvoiceExpense(
   expenses: Array<Expense>,
-  accountId: number,
+  accountId: string,
   accountName: string
 ): Expense {
   return {
     id: accountName,
     date: dayjs().startOf("month").toISOString(),
     name: `Invoice ${accountName}`,
-    account: accountId,
+    account_id: accountId,
+    bill_id: null,
     amount: expenses.reduce((acc, e) => acc + e.amount, 0),
     installment_count: null,
     installment_number: null,
@@ -79,10 +68,10 @@ function ResumePage() {
       .filter((e: Expense) => !e.confirmed)
       .reduce(
         (acc: AccountMappingAcc, expense: Expense) => {
-          if (expense.account === NUBANK_CC_ID) acc.nubank.push(expense);
-          else if (expense.account === BRADESCO_CC_ID)
+          if (expense.account_id === NUBANK_CC_ID) acc.nubank.push(expense);
+          else if (expense.account_id === BRADESCO_CC_ID)
             acc.bradesco.push(expense);
-          else if (expense.account === XP_CC_ID) acc.xp.push(expense);
+          else if (expense.account_id === XP_CC_ID) acc.xp.push(expense);
           else acc.accounts.push(expense);
 
           return acc;
@@ -145,7 +134,7 @@ function ResumePage() {
               <TableCell>{expense.name}</TableCell>
               {accountsAsync.data?.map((account) => (
                 <TableCell key={account.id} align="right">
-                  {account.id == expense.account
+                  {account.id == expense.account_id
                     ? formatCurrency(expense.amount)
                     : null}
                 </TableCell>
@@ -161,7 +150,9 @@ function ResumePage() {
                 {formatCurrency(
                   account.balance -
                     sumBy(
-                      expenses.filter((e: Expense) => e.account == account.id),
+                      expenses.filter(
+                        (e: Expense) => e.account_id === account.id
+                      ),
                       "amount"
                     )
                 )}
