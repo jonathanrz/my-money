@@ -3,7 +3,8 @@ const baseURL = "http://localhost:3001";
 const constants = {
   drawerWidth: 200,
   URLS: {
-    account: `${baseURL}/accounts`,
+    accounts: `${baseURL}/accounts`,
+    bills: `${baseURL}/bills`,
     expenses: `${baseURL}/expenses`,
   },
 };

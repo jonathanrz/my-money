@@ -17,7 +17,7 @@ import { styled } from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import constants from "../../constants";
 import formatCurrency from "../../helpers/formatCurrency";
-import { Expense } from "../../models";
+import { Bill, Expense } from "../../models";
 
 const BRADESCO_ACCOUNT_ID = "1";
 const NUCONTA_PJ_ACCOUNT_ID = "5";
@@ -47,16 +47,11 @@ function generateInvoiceExpense(
 ): Expense {
   return {
     id: accountName,
-    date: dayjs().startOf("month").toISOString(),
+    date: dayjs().startOf("month").minute(-dayjs().utcOffset()),
     name: `Invoice ${accountName}`,
     account_id: accountId,
-    bill_id: null,
     amount: expenses.reduce((acc, e) => acc + e.amount, 0),
-    installment_count: null,
-    installment_number: null,
-    installment_uuid: null,
     confirmed: false,
-    nubank_id: "",
   };
 }
 
@@ -68,33 +63,64 @@ function renderExpenseAmount(expense: Expense) {
 
 function ResumePage() {
   const accountsAsync = useQuery("bankAccounts", () =>
-    fetch(`${constants.URLS.account}?type=bank`)
+    fetch(`${constants.URLS.accounts}?type=bank`)
       .then((res) => res.json())
       .then((res) => orderBy(res, ["name"], ["asc"]))
   );
 
+  const billsAsync = useQuery("bills", () => {
+    const startOfMonth = dayjs()
+      .startOf("month")
+      .minute(dayjs().utcOffset())
+      .toISOString();
+    const endOfMonth = dayjs()
+      .endOf("month")
+      .minute(dayjs().utcOffset())
+      .toISOString();
+    return fetch(`${constants.URLS.bills}`)
+      .then((res) => res.json())
+      .then((res: Array<Bill>) =>
+        res
+          .map((b) => ({
+            ...b,
+            init_date: dayjs(b.init_date),
+            end_date: dayjs(b.end_date),
+          }))
+          .filter(
+            (b) =>
+              b.init_date.isSameOrBefore(startOfMonth) &&
+              b.end_date.isSameOrAfter(endOfMonth)
+          )
+      );
+  });
+
   const expensesAsync = useQuery("expense-2024-2", () =>
-    fetch(`${constants.URLS.expenses}-2024-2`).then((res) => res.json())
+    fetch(`${constants.URLS.expenses}-2024-2`)
+      .then((res) => res.json())
+      .then((res) =>
+        res.map((e: Expense) => ({
+          ...e,
+          date: dayjs(e.date, { utc: true }).minute(-dayjs().utcOffset()),
+        }))
+      )
   );
 
   const expenses = useMemo(() => {
     if (!expensesAsync.data) return [];
-    const grouped = expensesAsync.data
-      // .filter((e: Expense) => !e.confirmed)
-      .reduce(
-        (acc: AccountMappingAcc, expense: Expense) => {
-          if (expense.account_id === NUBANK_CC_ID) acc.nubank.push(expense);
-          else if (expense.account_id === BRADESCO_CC_ID)
-            acc.bradesco.push(expense);
-          else if (expense.account_id === XP_CC_ID) acc.xp.push(expense);
-          else acc.accounts.push(expense);
+    const grouped = expensesAsync.data.reduce(
+      (acc: AccountMappingAcc, expense: Expense) => {
+        if (expense.account_id === NUBANK_CC_ID) acc.nubank.push(expense);
+        else if (expense.account_id === BRADESCO_CC_ID)
+          acc.bradesco.push(expense);
+        else if (expense.account_id === XP_CC_ID) acc.xp.push(expense);
+        else acc.accounts.push(expense);
 
-          return acc;
-        },
-        { nubank: [], bradesco: [], xp: [], accounts: [] }
-      );
+        return acc;
+      },
+      { nubank: [], bradesco: [], xp: [], accounts: [] }
+    );
     const result = grouped.accounts;
-    if (grouped.nubank.length > 0)
+    /*if (grouped.nubank.length > 0)
       result.push(
         generateInvoiceExpense(grouped.nubank, NUCONTA_PJ_ACCOUNT_ID, "Nubank")
       );
@@ -106,12 +132,23 @@ function ResumePage() {
           "Bradesco"
         )
       );
-    if (grouped.nubank.length > 0)
+    if (grouped.xp.length > 0)
       result.push(
         generateInvoiceExpense(grouped.xp, NUCONTA_PJ_ACCOUNT_ID, "XP")
-      );
-    return result;
-  }, [expensesAsync.data]);
+      );*/
+    billsAsync.data?.forEach((bill) => {
+      if (!result.find((e: Expense) => e.bill_id === bill.id))
+        result.push({
+          id: bill.id,
+          date: dayjs().date(bill.due_day),
+          name: bill.name,
+          account_id: bill.account_id,
+          bill_id: bill.id,
+          amount: bill.value,
+        });
+    });
+    return result.sort((a: Expense, b: Expense) => a.date.diff(b.date));
+  }, [expensesAsync.data, billsAsync.data]);
 
   if (accountsAsync.isLoading || expensesAsync.isLoading)
     return <CircularProgress />;
@@ -122,11 +159,14 @@ function ResumePage() {
       </Alert>
     );
 
+  console.log({ expenses });
+
   return (
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell></TableCell>
             <TableCell></TableCell>
             {accountsAsync.data?.map((account) => (
               <TableCell key={account.id} align="right">
@@ -135,7 +175,8 @@ function ResumePage() {
             ))}
           </TableRow>
           <TableRow>
-            <TableCell></TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Date</TableCell>
             {accountsAsync.data?.map((account) => (
               <TableCell key={account.id} align="right">
                 {formatCurrency(account.balance)}
@@ -144,21 +185,25 @@ function ResumePage() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {expenses.map((expense: Expense) => (
-            <TableRow key={expense.id}>
-              <TableCell>{expense.name}</TableCell>
-              {accountsAsync.data?.map((account) => (
-                <TableCell key={account.id} align="right" color="primary">
-                  {account.id == expense.account_id
-                    ? renderExpenseAmount(expense)
-                    : null}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
+          {expenses
+            .filter((e: Expense) => !e.confirmed)
+            .map((expense: Expense) => (
+              <TableRow key={expense.id}>
+                <TableCell>{expense.name}</TableCell>
+                <TableCell>{expense.date.date()}</TableCell>
+                {accountsAsync.data?.map((account) => (
+                  <TableCell key={account.id} align="right" color="primary">
+                    {account.id == expense.account_id
+                      ? renderExpenseAmount(expense)
+                      : null}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
         </TableBody>
         <TableFooter>
           <TableRow>
+            <TableCell></TableCell>
             <TableCell></TableCell>
             {accountsAsync.data?.map((account) => (
               <TableCell key={account.id} align="right">

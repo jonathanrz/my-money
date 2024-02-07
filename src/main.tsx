@@ -4,6 +4,9 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { QueryClient, QueryClientProvider } from "react-query";
 import numbro from "numbro";
+import dayjs from "dayjs";
+import dayjsIsSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import dayjsIsSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import App from "./App.tsx";
 
 const queryClient = new QueryClient();
@@ -60,6 +63,8 @@ numbro.registerLanguage({
   },
 });
 numbro.setLanguage("pt-BR");
+dayjs.extend(dayjsIsSameOrBefore);
+dayjs.extend(dayjsIsSameOrAfter);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
