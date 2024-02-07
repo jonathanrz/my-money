@@ -13,6 +13,7 @@ import {
   TableFooter,
   Paper,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import constants from "../../constants";
 import formatCurrency from "../../helpers/formatCurrency";
@@ -30,6 +31,14 @@ type AccountMappingAcc = {
   xp: Array<Expense>;
   accounts: Array<Expense>;
 };
+
+const ExpenseConfirmed = styled("div")(({ theme }) => ({
+  color: theme.palette.grey[500],
+}));
+
+const ExpenseUnConfirmed = styled("div")(({ theme }) => ({
+  color: theme.palette.error.light,
+}));
 
 function generateInvoiceExpense(
   expenses: Array<Expense>,
@@ -51,6 +60,12 @@ function generateInvoiceExpense(
   };
 }
 
+function renderExpenseAmount(expense: Expense) {
+  const Component = expense.confirmed ? ExpenseConfirmed : ExpenseUnConfirmed;
+
+  return <Component>{formatCurrency(expense.amount)}</Component>;
+}
+
 function ResumePage() {
   const accountsAsync = useQuery("bankAccounts", () =>
     fetch(`${constants.URLS.account}?type=bank`)
@@ -65,7 +80,7 @@ function ResumePage() {
   const expenses = useMemo(() => {
     if (!expensesAsync.data) return [];
     const grouped = expensesAsync.data
-      .filter((e: Expense) => !e.confirmed)
+      // .filter((e: Expense) => !e.confirmed)
       .reduce(
         (acc: AccountMappingAcc, expense: Expense) => {
           if (expense.account_id === NUBANK_CC_ID) acc.nubank.push(expense);
@@ -133,9 +148,9 @@ function ResumePage() {
             <TableRow key={expense.id}>
               <TableCell>{expense.name}</TableCell>
               {accountsAsync.data?.map((account) => (
-                <TableCell key={account.id} align="right">
+                <TableCell key={account.id} align="right" color="primary">
                   {account.id == expense.account_id
-                    ? formatCurrency(expense.amount)
+                    ? renderExpenseAmount(expense)
                     : null}
                 </TableCell>
               ))}
@@ -151,7 +166,8 @@ function ResumePage() {
                   account.balance -
                     sumBy(
                       expenses.filter(
-                        (e: Expense) => e.account_id === account.id
+                        (e: Expense) =>
+                          !e.confirmed && e.account_id === account.id
                       ),
                       "amount"
                     )
