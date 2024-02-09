@@ -1,3 +1,5 @@
+import { Dayjs } from "dayjs";
+
 const baseURL = "http://localhost:3001";
 
 const constants = {
@@ -6,6 +8,8 @@ const constants = {
     accounts: `${baseURL}/accounts`,
     bills: `${baseURL}/bills`,
     expenses: `${baseURL}/expenses`,
+    buildExpensesUrl: (date: Dayjs) =>
+      `${baseURL}/expenses-${date.year()}-${date.month() + 1}`,
   },
 };
 

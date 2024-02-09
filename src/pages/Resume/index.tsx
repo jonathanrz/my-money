@@ -19,18 +19,13 @@ import constants from "../../constants";
 import formatCurrency from "../../helpers/formatCurrency";
 import { Bill, Expense } from "../../models";
 
-const BRADESCO_ACCOUNT_ID = "1";
 const NUCONTA_PJ_ACCOUNT_ID = "5";
 const NUBANK_CC_ID = "7";
 const BRADESCO_CC_ID = "8";
 const XP_CC_ID = "9";
+const CC_IDS = [NUBANK_CC_ID, BRADESCO_CC_ID, XP_CC_ID];
 
-type AccountMappingAcc = {
-  nubank: Array<Expense>;
-  bradesco: Array<Expense>;
-  xp: Array<Expense>;
-  accounts: Array<Expense>;
-};
+const currentMonth = dayjs();
 
 const ExpenseConfirmed = styled("div")(({ theme }) => ({
   color: theme.palette.grey[500],
@@ -69,11 +64,13 @@ function ResumePage() {
   );
 
   const billsAsync = useQuery("bills", () => {
-    const startOfMonth = dayjs()
+    const startOfMonth = currentMonth
+      .clone()
       .startOf("month")
       .minute(dayjs().utcOffset())
       .toISOString();
-    const endOfMonth = dayjs()
+    const endOfMonth = currentMonth
+      .clone()
       .endOf("month")
       .minute(dayjs().utcOffset())
       .toISOString();
@@ -94,48 +91,55 @@ function ResumePage() {
       );
   });
 
-  const expensesAsync = useQuery("expense-2024-2", () =>
-    fetch(`${constants.URLS.expenses}-2024-2`)
-      .then((res) => res.json())
-      .then((res) =>
-        res.map((e: Expense) => ({
-          ...e,
-          date: dayjs(e.date, { utc: true }).minute(-dayjs().utcOffset()),
-        }))
-      )
+  const expensesAsync = useQuery(
+    `expense-${currentMonth.year()}-${currentMonth.month() + 1}`,
+    () =>
+      fetch(`${constants.URLS.buildExpensesUrl(currentMonth)}`)
+        .then((res) => res.json())
+        .then(async (res) => {
+          const result = res
+            .filter((e: Expense) => !CC_IDS.includes(e.account_id || ""))
+            .map((e: Expense) => ({
+              ...e,
+              date: dayjs(e.date, { utc: true }).minute(-dayjs().utcOffset()),
+            }));
+
+          const lastMonth = currentMonth.clone().add(-1, "month");
+
+          const nubankExpenses = await fetch(
+            `${constants.URLS.buildExpensesUrl(
+              lastMonth
+            )}?account_id=${NUBANK_CC_ID}&confirmed=false`
+          ).then((res) => res.json());
+
+          if (nubankExpenses.length > 0) {
+            result.push(
+              generateInvoiceExpense(
+                nubankExpenses,
+                NUCONTA_PJ_ACCOUNT_ID,
+                "Nubank"
+              )
+            );
+          }
+          const xpExpenses = await fetch(
+            `${constants.URLS.buildExpensesUrl(
+              lastMonth
+            )}?account_id=${XP_CC_ID}&confirmed=false`
+          ).then((res) => res.json());
+
+          if (xpExpenses.length > 0) {
+            result.push(
+              generateInvoiceExpense(xpExpenses, NUCONTA_PJ_ACCOUNT_ID, "XP")
+            );
+          }
+
+          return result;
+        })
   );
 
   const expenses = useMemo(() => {
     if (!expensesAsync.data) return [];
-    const grouped = expensesAsync.data.reduce(
-      (acc: AccountMappingAcc, expense: Expense) => {
-        if (expense.account_id === NUBANK_CC_ID) acc.nubank.push(expense);
-        else if (expense.account_id === BRADESCO_CC_ID)
-          acc.bradesco.push(expense);
-        else if (expense.account_id === XP_CC_ID) acc.xp.push(expense);
-        else acc.accounts.push(expense);
-
-        return acc;
-      },
-      { nubank: [], bradesco: [], xp: [], accounts: [] }
-    );
-    const result = grouped.accounts;
-    /*if (grouped.nubank.length > 0)
-      result.push(
-        generateInvoiceExpense(grouped.nubank, NUCONTA_PJ_ACCOUNT_ID, "Nubank")
-      );
-    if (grouped.bradesco.length > 0)
-      result.push(
-        generateInvoiceExpense(
-          grouped.bradesco,
-          BRADESCO_ACCOUNT_ID,
-          "Bradesco"
-        )
-      );
-    if (grouped.xp.length > 0)
-      result.push(
-        generateInvoiceExpense(grouped.xp, NUCONTA_PJ_ACCOUNT_ID, "XP")
-      );*/
+    const result = expensesAsync.data;
     billsAsync.data?.forEach((bill) => {
       if (!result.find((e: Expense) => e.bill_id === bill.id))
         result.push({
