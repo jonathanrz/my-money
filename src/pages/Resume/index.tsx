@@ -8,7 +8,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TableFooter,
+  TableBody,
   Paper,
 } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -19,6 +19,7 @@ import useExpenseQuery from "./useExpenseQuery";
 import MonthData from "./MonthData";
 
 const currentMonth = dayjs();
+const nextMonth = dayjs().add(1, "month");
 
 function ResumePage() {
   const accountsAsync = useQuery("bankAccounts", () =>
@@ -28,15 +29,40 @@ function ResumePage() {
   );
 
   const expensesAsync = useExpenseQuery(currentMonth);
+  const nextMonthExpensesAsync = useExpenseQuery(nextMonth);
 
-  if (accountsAsync.isLoading || expensesAsync.isLoading)
-    return <CircularProgress />;
-  if (accountsAsync.error || expensesAsync.error)
+  const isLoading =
+    accountsAsync.isLoading ||
+    expensesAsync.isLoading ||
+    nextMonthExpensesAsync.isLoading;
+  const error =
+    accountsAsync.error || expensesAsync.error || nextMonthExpensesAsync.error;
+
+  if (isLoading) return <CircularProgress />;
+  if (error) return <Alert severity="error">{JSON.stringify(error)}</Alert>;
+
+  function renderAccountBalanceUpdated(expenses: Array<Expense>) {
+    console.log({ expenses, accounts: accountsAsync.data });
     return (
-      <Alert severity="error">
-        {JSON.stringify(accountsAsync.error || expensesAsync.error)}
-      </Alert>
+      <TableRow>
+        <TableCell></TableCell>
+        <TableCell></TableCell>
+        {accountsAsync.data?.map((account) => (
+          <TableCell key={account.id} align="right">
+            {formatCurrency(
+              account.balance -
+                sumBy(
+                  expenses.filter(
+                    (e: Expense) => !e.confirmed && e.account_id === account.id
+                  ),
+                  "amount"
+                )
+            )}
+          </TableCell>
+        ))}
+      </TableRow>
     );
+  }
 
   return (
     <TableContainer component={Paper}>
@@ -61,31 +87,23 @@ function ResumePage() {
             ))}
           </TableRow>
         </TableHead>
-        <MonthData
-          currentMonth={currentMonth}
-          monthExpenses={expensesAsync.data || []}
-          accounts={accountsAsync.data || []}
-        />
-        <TableFooter>
-          <TableRow>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-            {accountsAsync.data?.map((account) => (
-              <TableCell key={account.id} align="right">
-                {formatCurrency(
-                  account.balance -
-                    sumBy(
-                      expensesAsync.data?.filter(
-                        (e: Expense) =>
-                          !e.confirmed && e.account_id === account.id
-                      ),
-                      "amount"
-                    )
-                )}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableFooter>
+        <TableBody>
+          <MonthData
+            currentMonth={currentMonth}
+            monthExpenses={expensesAsync.data || []}
+            accounts={accountsAsync.data || []}
+          />
+          {renderAccountBalanceUpdated(expensesAsync.data || [])}
+          <MonthData
+            currentMonth={nextMonth}
+            monthExpenses={nextMonthExpensesAsync.data || []}
+            accounts={accountsAsync.data || []}
+          />
+          {renderAccountBalanceUpdated([
+            ...expensesAsync.data,
+            ...nextMonthExpensesAsync.data,
+          ])}
+        </TableBody>
       </Table>
     </TableContainer>
   );

@@ -75,25 +75,21 @@ function MonthData({
     return result.sort((a: Expense, b: Expense) => a.date.diff(b.date));
   }, [monthExpenses, billsAsync.data]);
 
-  return (
-    <TableBody>
-      {expenses
-        .filter((e: Expense) => !e.confirmed)
-        .map((expense: Expense) => (
-          <TableRow key={expense.id}>
-            <TableCell>{expense.name}</TableCell>
-            <TableCell>{expense.date.date()}</TableCell>
-            {accounts.map((account) => (
-              <TableCell key={account.id} align="right" color="primary">
-                {account.id == expense.account_id
-                  ? renderExpenseAmount(expense)
-                  : null}
-              </TableCell>
-            ))}
-          </TableRow>
+  return expenses
+    .filter((e: Expense) => !e.confirmed)
+    .map((expense: Expense) => (
+      <TableRow key={expense.id}>
+        <TableCell>{expense.name}</TableCell>
+        <TableCell>{expense.date.date()}</TableCell>
+        {accounts.map((account) => (
+          <TableCell key={account.id} align="right" color="primary">
+            {account.id == expense.account_id
+              ? renderExpenseAmount(expense)
+              : null}
+          </TableCell>
         ))}
-    </TableBody>
-  );
+      </TableRow>
+    ));
 }
 
 export default MonthData;
