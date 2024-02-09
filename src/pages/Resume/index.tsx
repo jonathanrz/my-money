@@ -5,7 +5,6 @@ import dayjs from "dayjs";
 import {
   Alert,
   Table,
-  TableBody,
   TableCell,
   TableContainer,
   TableHead,
@@ -13,48 +12,14 @@ import {
   TableFooter,
   Paper,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import constants from "../../constants";
 import formatCurrency from "../../helpers/formatCurrency";
 import { Bill, Expense } from "../../models";
-
-const NUCONTA_PJ_ACCOUNT_ID = "5";
-const NUBANK_CC_ID = "7";
-const BRADESCO_CC_ID = "8";
-const XP_CC_ID = "9";
-const CC_IDS = [NUBANK_CC_ID, BRADESCO_CC_ID, XP_CC_ID];
+import useExpenseQuery from "./useExpenseQuery";
+import MonthData from "./MonthData";
 
 const currentMonth = dayjs();
-
-const ExpenseConfirmed = styled("div")(({ theme }) => ({
-  color: theme.palette.grey[500],
-}));
-
-const ExpenseUnConfirmed = styled("div")(({ theme }) => ({
-  color: theme.palette.error.light,
-}));
-
-function generateInvoiceExpense(
-  expenses: Array<Expense>,
-  accountId: string,
-  accountName: string
-): Expense {
-  return {
-    id: accountName,
-    date: dayjs().startOf("month").minute(-dayjs().utcOffset()),
-    name: `Invoice ${accountName}`,
-    account_id: accountId,
-    amount: expenses.reduce((acc, e) => acc + e.amount, 0),
-    confirmed: false,
-  };
-}
-
-function renderExpenseAmount(expense: Expense) {
-  const Component = expense.confirmed ? ExpenseConfirmed : ExpenseUnConfirmed;
-
-  return <Component>{formatCurrency(expense.amount)}</Component>;
-}
 
 function ResumePage() {
   const accountsAsync = useQuery("bankAccounts", () =>
@@ -91,51 +56,7 @@ function ResumePage() {
       );
   });
 
-  const expensesAsync = useQuery(
-    `expense-${currentMonth.year()}-${currentMonth.month() + 1}`,
-    () =>
-      fetch(`${constants.URLS.buildExpensesUrl(currentMonth)}`)
-        .then((res) => res.json())
-        .then(async (res) => {
-          const result = res
-            .filter((e: Expense) => !CC_IDS.includes(e.account_id || ""))
-            .map((e: Expense) => ({
-              ...e,
-              date: dayjs(e.date, { utc: true }).minute(-dayjs().utcOffset()),
-            }));
-
-          const lastMonth = currentMonth.clone().add(-1, "month");
-
-          const nubankExpenses = await fetch(
-            `${constants.URLS.buildExpensesUrl(
-              lastMonth
-            )}?account_id=${NUBANK_CC_ID}&confirmed=false`
-          ).then((res) => res.json());
-
-          if (nubankExpenses.length > 0) {
-            result.push(
-              generateInvoiceExpense(
-                nubankExpenses,
-                NUCONTA_PJ_ACCOUNT_ID,
-                "Nubank"
-              )
-            );
-          }
-          const xpExpenses = await fetch(
-            `${constants.URLS.buildExpensesUrl(
-              lastMonth
-            )}?account_id=${XP_CC_ID}&confirmed=false`
-          ).then((res) => res.json());
-
-          if (xpExpenses.length > 0) {
-            result.push(
-              generateInvoiceExpense(xpExpenses, NUCONTA_PJ_ACCOUNT_ID, "XP")
-            );
-          }
-
-          return result;
-        })
-  );
+  const expensesAsync = useExpenseQuery(currentMonth);
 
   const expenses = useMemo(() => {
     if (!expensesAsync.data) return [];
@@ -188,23 +109,11 @@ function ResumePage() {
             ))}
           </TableRow>
         </TableHead>
-        <TableBody>
-          {expenses
-            .filter((e: Expense) => !e.confirmed)
-            .map((expense: Expense) => (
-              <TableRow key={expense.id}>
-                <TableCell>{expense.name}</TableCell>
-                <TableCell>{expense.date.date()}</TableCell>
-                {accountsAsync.data?.map((account) => (
-                  <TableCell key={account.id} align="right" color="primary">
-                    {account.id == expense.account_id
-                      ? renderExpenseAmount(expense)
-                      : null}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-        </TableBody>
+        <MonthData
+          currentMonth={currentMonth}
+          monthExpenses={expenses}
+          accounts={accountsAsync.data || []}
+        />
         <TableFooter>
           <TableRow>
             <TableCell></TableCell>

@@ -1,5 +1,12 @@
 import { Dayjs } from "dayjs";
 
+export type Account = {
+  balance: number;
+  id: string;
+  name: string;
+  type: string;
+};
+
 export type Bill = {
   account_id: string;
   category_id: string;
