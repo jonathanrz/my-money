@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { orderBy, sumBy } from "lodash";
 import { useQuery } from "react-query";
 import dayjs from "dayjs";
@@ -10,7 +11,10 @@ import {
   TableRow,
   TableBody,
   Paper,
+  Checkbox,
+  Typography,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import constants from "../../constants";
 import formatCurrency from "../../helpers/formatCurrency";
@@ -18,25 +22,35 @@ import { Transaction } from "../../models";
 import useExpenseQuery from "./useExpenseQuery";
 import MonthData from "./MonthData";
 
+const ShowConfirmedCheckboxContainer = styled("div")(({ theme }) => ({
+  alignItems: "center",
+  justifyContent: "flex-end",
+  display: "flex",
+  gap: theme.spacing(1),
+}));
+
 const currentMonth = dayjs();
 const nextMonth = dayjs().add(1, "month");
 
 function ResumePage() {
+  const [showConfirmed, setShowConfirmed] = useState(false);
   const accountsAsync = useQuery("bankAccounts", () =>
     fetch(`${constants.URLS.accounts}?type=bank`)
       .then((res) => res.json())
       .then((res) => orderBy(res, ["name"], ["asc"]))
   );
 
-  const expensesAsync = useExpenseQuery(currentMonth);
-  const nextMonthExpensesAsync = useExpenseQuery(nextMonth);
+  const transactionsAsync = useExpenseQuery(currentMonth);
+  const nextMonthTransactionsAsync = useExpenseQuery(nextMonth);
 
   const isLoading =
     accountsAsync.isLoading ||
-    expensesAsync.isLoading ||
-    nextMonthExpensesAsync.isLoading;
+    transactionsAsync.isLoading ||
+    nextMonthTransactionsAsync.isLoading;
   const error =
-    accountsAsync.error || expensesAsync.error || nextMonthExpensesAsync.error;
+    accountsAsync.error ||
+    transactionsAsync.error ||
+    nextMonthTransactionsAsync.error;
 
   if (isLoading) return <CircularProgress />;
   if (error) return <Alert severity="error">{JSON.stringify(error)}</Alert>;
@@ -49,7 +63,7 @@ function ResumePage() {
         {accountsAsync.data?.map((account) => (
           <TableCell key={account.id} align="right">
             {formatCurrency(
-              account.balance -
+              account.balance +
                 sumBy(
                   transactions.filter(
                     (e: Transaction) =>
@@ -89,20 +103,31 @@ function ResumePage() {
         </TableHead>
         <TableBody>
           <MonthData
-            transactions={expensesAsync.transactions || []}
+            transactions={(transactionsAsync.transactions || []).filter(
+              (e: Transaction) => showConfirmed || !e.confirmed
+            )}
             accounts={accountsAsync.data || []}
           />
-          {renderAccountBalanceUpdated(expensesAsync.transactions || [])}
+          {renderAccountBalanceUpdated(transactionsAsync.transactions || [])}
           <MonthData
-            transactions={nextMonthExpensesAsync.transactions || []}
+            transactions={(
+              nextMonthTransactionsAsync.transactions || []
+            ).filter((e: Transaction) => showConfirmed || !e.confirmed)}
             accounts={accountsAsync.data || []}
           />
           {renderAccountBalanceUpdated([
-            ...expensesAsync.transactions,
-            ...nextMonthExpensesAsync.transactions,
+            ...transactionsAsync.transactions,
+            ...nextMonthTransactionsAsync.transactions,
           ])}
         </TableBody>
       </Table>
+      <ShowConfirmedCheckboxContainer>
+        <Checkbox
+          checked={showConfirmed}
+          onClick={() => setShowConfirmed(!showConfirmed)}
+        />{" "}
+        <Typography>Show Confirmed</Typography>
+      </ShowConfirmedCheckboxContainer>
     </TableContainer>
   );
 }

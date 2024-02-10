@@ -27,21 +27,19 @@ function MonthData({
   transactions: Array<Transaction>;
   accounts: Array<Account>;
 }) {
-  return transactions
-    .filter((e: Transaction) => !e.confirmed)
-    .map((transaction: Transaction) => (
-      <TableRow key={transaction.id}>
-        <TableCell>{transaction.name}</TableCell>
-        <TableCell>{transaction.date.date()}</TableCell>
-        {accounts.map((account) => (
-          <TableCell key={account.id} align="right" color="primary">
-            {account.id == transaction.account_id
-              ? renderExpenseAmount(transaction)
-              : null}
-          </TableCell>
-        ))}
-      </TableRow>
-    ));
+  return transactions.map((transaction: Transaction) => (
+    <TableRow key={transaction.id}>
+      <TableCell>{transaction.name}</TableCell>
+      <TableCell>{transaction.date.date()}</TableCell>
+      {accounts.map((account) => (
+        <TableCell key={account.id} align="right" color="primary">
+          {account.id == transaction.account_id
+            ? renderExpenseAmount(transaction)
+            : null}
+        </TableCell>
+      ))}
+    </TableRow>
+  ));
 }
 
 export default MonthData;
