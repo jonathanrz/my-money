@@ -31,3 +31,21 @@ export type Expense = {
   confirmed: boolean;
   nubank_id?: string;
 };
+
+export type Transaction = {
+  id: string;
+  date: Dayjs;
+  name: string;
+  account_id: string;
+  confirmed: boolean;
+  amount: number;
+};
+
+export type Receipt = {
+  id: string;
+  date: Dayjs;
+  name: string;
+  account_id: string;
+  confirmed: boolean;
+  amount: number;
+};

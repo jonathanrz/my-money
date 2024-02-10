@@ -14,7 +14,7 @@ import {
 import CircularProgress from "@mui/material/CircularProgress";
 import constants from "../../constants";
 import formatCurrency from "../../helpers/formatCurrency";
-import { Expense } from "../../models";
+import { Transaction } from "../../models";
 import useExpenseQuery from "./useExpenseQuery";
 import MonthData from "./MonthData";
 
@@ -41,7 +41,7 @@ function ResumePage() {
   if (isLoading) return <CircularProgress />;
   if (error) return <Alert severity="error">{JSON.stringify(error)}</Alert>;
 
-  function renderAccountBalanceUpdated(expenses: Array<Expense>) {
+  function renderAccountBalanceUpdated(transactions: Array<Transaction>) {
     return (
       <TableRow>
         <TableCell></TableCell>
@@ -51,8 +51,9 @@ function ResumePage() {
             {formatCurrency(
               account.balance -
                 sumBy(
-                  expenses.filter(
-                    (e: Expense) => !e.confirmed && e.account_id === account.id
+                  transactions.filter(
+                    (e: Transaction) =>
+                      !e.confirmed && e.account_id === account.id
                   ),
                   "amount"
                 )
@@ -88,19 +89,17 @@ function ResumePage() {
         </TableHead>
         <TableBody>
           <MonthData
-            currentMonth={currentMonth}
-            monthExpenses={expensesAsync.data || []}
+            transactions={expensesAsync.transactions || []}
             accounts={accountsAsync.data || []}
           />
-          {renderAccountBalanceUpdated(expensesAsync.data || [])}
+          {renderAccountBalanceUpdated(expensesAsync.transactions || [])}
           <MonthData
-            currentMonth={nextMonth}
-            monthExpenses={nextMonthExpensesAsync.data || []}
+            transactions={nextMonthExpensesAsync.transactions || []}
             accounts={accountsAsync.data || []}
           />
           {renderAccountBalanceUpdated([
-            ...expensesAsync.data,
-            ...nextMonthExpensesAsync.data,
+            ...expensesAsync.transactions,
+            ...nextMonthExpensesAsync.transactions,
           ])}
         </TableBody>
       </Table>

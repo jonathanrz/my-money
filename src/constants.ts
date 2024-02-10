@@ -10,6 +10,7 @@ const constants = {
     expenses: `${baseURL}/expenses`,
     buildExpensesUrl: (date: Dayjs) =>
       `${baseURL}/expenses-${date.year()}-${date.month() + 1}`,
+    receipts: `${baseURL}/receipts`,
   },
 };
 

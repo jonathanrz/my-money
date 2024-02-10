@@ -1,39 +1,42 @@
 import { TableCell, TableRow } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import formatCurrency from "../../helpers/formatCurrency";
-import { Account, Expense } from "../../models";
+import { Account, Transaction } from "../../models";
 
-const ExpenseConfirmed = styled("div")(({ theme }) => ({
-  color: theme.palette.grey[500],
-}));
-
-const ExpenseUnConfirmed = styled("div")(({ theme }) => ({
+const ExpenseValue = styled("div")(({ theme }) => ({
   color: theme.palette.error.light,
 }));
 
-function renderExpenseAmount(expense: Expense) {
-  const Component = expense.confirmed ? ExpenseConfirmed : ExpenseUnConfirmed;
+const ReceiptValue = styled("div")(({ theme }) => ({
+  color: theme.palette.success.light,
+}));
 
-  return <Component>{formatCurrency(expense.amount)}</Component>;
+function renderExpenseAmount(expense: Transaction) {
+  const ValueComponent = expense.amount > 0 ? ReceiptValue : ExpenseValue;
+  return (
+    <ValueComponent sx={{ fontWeight: expense.confirmed ? "normal" : "bold" }}>
+      {formatCurrency(Math.abs(expense.amount))}
+    </ValueComponent>
+  );
 }
 
 function MonthData({
-  monthExpenses,
+  transactions,
   accounts,
 }: {
-  monthExpenses: Array<Expense>;
+  transactions: Array<Transaction>;
   accounts: Array<Account>;
 }) {
-  return monthExpenses
-    .filter((e: Expense) => !e.confirmed)
-    .map((expense: Expense) => (
-      <TableRow key={expense.id}>
-        <TableCell>{expense.name}</TableCell>
-        <TableCell>{expense.date.date()}</TableCell>
+  return transactions
+    .filter((e: Transaction) => !e.confirmed)
+    .map((transaction: Transaction) => (
+      <TableRow key={transaction.id}>
+        <TableCell>{transaction.name}</TableCell>
+        <TableCell>{transaction.date.date()}</TableCell>
         {accounts.map((account) => (
           <TableCell key={account.id} align="right" color="primary">
-            {account.id == expense.account_id
-              ? renderExpenseAmount(expense)
+            {account.id == transaction.account_id
+              ? renderExpenseAmount(transaction)
               : null}
           </TableCell>
         ))}

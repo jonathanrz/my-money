@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "react-query";
 import dayjs, { Dayjs } from "dayjs";
 import constants from "../../constants";
-import { Bill, Expense } from "../../models";
+import { Bill, Expense, Receipt, Transaction } from "../../models";
 
 const NUCONTA_PJ_ACCOUNT_ID = "5";
 const NUBANK_CC_ID = "7";
@@ -26,67 +26,63 @@ function generateInvoiceExpense(
 }
 
 function useExpenseQuery(month: Dayjs) {
-  const expensesAsync = useQuery(
-    `expense-${month.year()}-${month.month() + 1}`,
-    () =>
-      fetch(`${constants.URLS.buildExpensesUrl(month)}`)
-        .then((res) => res.json())
-        .then(async (res) => {
-          const result = res
-            .filter((e: Expense) => !CC_IDS.includes(e.account_id || ""))
-            .map((e: Expense) => ({
-              ...e,
-              date: dayjs(e.date, { utc: true }).minute(-dayjs().utcOffset()),
-            }));
+  const startOfMonth = month
+    .clone()
+    .startOf("month")
+    .minute(dayjs().utcOffset());
+  const endOfMonth = month.clone().endOf("month").minute(dayjs().utcOffset());
 
-          const lastMonth = month.clone().add(-1, "month");
+  function generateMonthKey(key: string) {
+    return `${key}-${month.year()}-${month.month() + 1}`;
+  }
 
-          const nubankExpenses = await fetch(
-            `${constants.URLS.buildExpensesUrl(
-              lastMonth
-            )}?account_id=${NUBANK_CC_ID}`
-          )
-            .then((res) => res.json())
-            .then((res) => res.filter((e: Expense) => !e.confirmed));
+  const expensesAsync = useQuery(generateMonthKey("expenses"), () =>
+    fetch(`${constants.URLS.buildExpensesUrl(month)}`)
+      .then((res) => res.json())
+      .then(async (res) => {
+        const result = res
+          .filter((e: Expense) => !CC_IDS.includes(e.account_id || ""))
+          .map((e: Expense) => ({
+            ...e,
+            date: dayjs(e.date, { utc: true }).minute(-dayjs().utcOffset()),
+          }));
 
-          if (nubankExpenses.length > 0) {
-            result.push(
-              generateInvoiceExpense(
-                nubankExpenses,
-                NUCONTA_PJ_ACCOUNT_ID,
-                "Nubank"
-              )
-            );
-          }
-          const xpExpenses = await fetch(
-            `${constants.URLS.buildExpensesUrl(
-              lastMonth
-            )}?account_id=${XP_CC_ID}`
-          )
-            .then((res) => res.json())
-            .then((res) => res.filter((e: Expense) => !e.confirmed));
+        const lastMonth = month.clone().add(-1, "month");
 
-          if (xpExpenses.length > 0) {
-            result.push(
-              generateInvoiceExpense(xpExpenses, NUCONTA_PJ_ACCOUNT_ID, "XP")
-            );
-          }
+        const nubankExpenses = await fetch(
+          `${constants.URLS.buildExpensesUrl(
+            lastMonth
+          )}?account_id=${NUBANK_CC_ID}`
+        )
+          .then((res) => res.json())
+          .then((res) => res.filter((e: Expense) => !e.confirmed));
 
-          return result;
-        })
+        if (nubankExpenses.length > 0) {
+          result.push(
+            generateInvoiceExpense(
+              nubankExpenses,
+              NUCONTA_PJ_ACCOUNT_ID,
+              "Nubank"
+            )
+          );
+        }
+        const xpExpenses = await fetch(
+          `${constants.URLS.buildExpensesUrl(lastMonth)}?account_id=${XP_CC_ID}`
+        )
+          .then((res) => res.json())
+          .then((res) => res.filter((e: Expense) => !e.confirmed));
+
+        if (xpExpenses.length > 0) {
+          result.push(
+            generateInvoiceExpense(xpExpenses, NUCONTA_PJ_ACCOUNT_ID, "XP")
+          );
+        }
+
+        return result;
+      })
   );
 
-  const billsAsync = useQuery("bills", () => {
-    const startOfMonth = month
-      .clone()
-      .startOf("month")
-      .minute(dayjs().utcOffset())
-      .toISOString();
-    const endOfMonth = month
-      .clone()
-      .endOf("month")
-      .minute(dayjs().utcOffset())
-      .toISOString();
+  const billsAsync = useQuery(generateMonthKey("bills"), () => {
     return fetch(`${constants.URLS.bills}`)
       .then((res) => res.json())
       .then((res: Array<Bill>) =>
@@ -104,6 +100,23 @@ function useExpenseQuery(month: Dayjs) {
       );
   });
 
+  const receiptsAsync = useQuery(generateMonthKey("receipts"), () => {
+    return fetch(`${constants.URLS.receipts}`)
+      .then((res) => res.json())
+      .then((res: Array<Receipt>) =>
+        res
+          .map((r) => ({
+            ...r,
+            date: dayjs(r.date),
+          }))
+          .filter(
+            (r) =>
+              r.date.isSameOrAfter(startOfMonth) &&
+              r.date.isSameOrBefore(endOfMonth)
+          )
+      );
+  });
+
   const expenses = useMemo(() => {
     if (!expensesAsync.data) return [];
     if (!billsAsync.data) return expensesAsync.data;
@@ -113,7 +126,7 @@ function useExpenseQuery(month: Dayjs) {
       if (!result.find((e: Expense) => e.bill_id === bill.id))
         result.push({
           id: bill.id,
-          date: dayjs().date(bill.due_day),
+          date: month.clone().date(bill.due_day),
           name: bill.name,
           account_id: bill.account_id,
           bill_id: bill.id,
@@ -121,13 +134,28 @@ function useExpenseQuery(month: Dayjs) {
           confirmed: false,
         });
     });
-    return result.sort((a: Expense, b: Expense) => a.date.diff(b.date));
-  }, [expensesAsync.data, billsAsync.data]);
+    return result;
+  }, [month, expensesAsync.data, billsAsync.data]);
+
+  console.log({ expenses, receipts: receiptsAsync.data });
 
   return {
-    isLoading: expensesAsync.isLoading || billsAsync.isLoading,
-    error: expensesAsync.error || billsAsync.error,
-    data: expenses,
+    isLoading:
+      expensesAsync.isLoading ||
+      billsAsync.isLoading ||
+      receiptsAsync.isLoading,
+    error: expensesAsync.error || billsAsync.error || receiptsAsync.error,
+    transactions: [
+      ...expenses.map((e: Expense) => ({
+        id: e.id,
+        date: e.date,
+        name: e.name,
+        account_id: e.account_id,
+        confirmed: e.confirmed,
+        amount: e.amount * -1,
+      })),
+      ...(receiptsAsync.data || []),
+    ].sort((a: Transaction, b: Transaction) => a.date.diff(b.date)),
   };
 }
 
