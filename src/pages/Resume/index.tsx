@@ -42,7 +42,6 @@ function ResumePage() {
   if (error) return <Alert severity="error">{JSON.stringify(error)}</Alert>;
 
   function renderAccountBalanceUpdated(expenses: Array<Expense>) {
-    console.log({ expenses, accounts: accountsAsync.data });
     return (
       <TableRow>
         <TableCell></TableCell>
