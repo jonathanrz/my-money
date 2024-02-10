@@ -44,8 +44,10 @@ function useExpenseQuery(month: Dayjs) {
           const nubankExpenses = await fetch(
             `${constants.URLS.buildExpensesUrl(
               lastMonth
-            )}?account_id=${NUBANK_CC_ID}&confirmed=false`
-          ).then((res) => res.json());
+            )}?account_id=${NUBANK_CC_ID}`
+          )
+            .then((res) => res.json())
+            .then((res) => res.filter((e: Expense) => !e.confirmed));
 
           if (nubankExpenses.length > 0) {
             result.push(
@@ -59,8 +61,10 @@ function useExpenseQuery(month: Dayjs) {
           const xpExpenses = await fetch(
             `${constants.URLS.buildExpensesUrl(
               lastMonth
-            )}?account_id=${XP_CC_ID}&confirmed=false`
-          ).then((res) => res.json());
+            )}?account_id=${XP_CC_ID}`
+          )
+            .then((res) => res.json())
+            .then((res) => res.filter((e: Expense) => !e.confirmed));
 
           if (xpExpenses.length > 0) {
             result.push(
