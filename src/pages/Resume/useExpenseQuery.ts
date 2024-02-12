@@ -22,6 +22,7 @@ function generateInvoiceExpense(
     account_id: accountId,
     amount: expenses.reduce((acc, e) => acc + e.amount, 0),
     confirmed: false,
+    billForecast: false,
   };
 }
 
@@ -132,6 +133,7 @@ function useExpenseQuery(month: Dayjs) {
           bill_id: bill.id,
           amount: bill.value,
           confirmed: false,
+          billForecast: true,
         });
     });
     return result;
@@ -153,9 +155,14 @@ function useExpenseQuery(month: Dayjs) {
         account_id: e.account_id,
         confirmed: e.confirmed,
         amount: e.amount * -1,
+        billForecast: e.billForecast,
       })),
       ...(receiptsAsync.data || []),
     ].sort((a: Transaction, b: Transaction) => a.date.diff(b.date)),
+    refetch: () => {
+      expensesAsync.refetch();
+      receiptsAsync.refetch();
+    },
   };
 }
 

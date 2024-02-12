@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { orderBy, sumBy } from "lodash";
-import { useQuery } from "react-query";
+import { useQuery, useMutation } from "react-query";
 import dayjs from "dayjs";
 import {
   Alert,
@@ -18,7 +18,7 @@ import { styled } from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import constants from "../../constants";
 import formatCurrency from "../../helpers/formatCurrency";
-import { Transaction } from "../../models";
+import { Account, Transaction } from "../../models";
 import useExpenseQuery from "./useExpenseQuery";
 import MonthData from "./MonthData";
 
@@ -39,6 +39,44 @@ function ResumePage() {
       .then((res) => res.json())
       .then((res) => orderBy(res, ["name"], ["asc"]))
   );
+
+  const confirmTransactionMutation = useMutation({
+    mutationFn: async (transaction: Transaction) => {
+      const isExpense = transaction.amount < 0;
+      const url = isExpense
+        ? constants.URLS.buildExpensesUrl(transaction.date)
+        : constants.URLS.receipts;
+      await fetch(`${url}/${transaction.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ confirmed: !transaction.confirmed }),
+      });
+      transactionsAsync.refetch();
+      nextMonthTransactionsAsync.refetch();
+      const account = accountsAsync.data?.find(
+        (acc: Account) => acc.id === transaction.account_id
+      );
+      if (account) {
+        let updatedAccountBalance = 0;
+        if (transaction.confirmed) {
+          updatedAccountBalance = account.balance - transaction.amount;
+        } else {
+          updatedAccountBalance = account.balance + transaction.amount;
+        }
+        await fetch(`${constants.URLS.accounts}/${transaction.account_id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ balance: updatedAccountBalance }),
+        });
+
+        accountsAsync.refetch();
+      }
+    },
+  });
 
   const transactionsAsync = useExpenseQuery(currentMonth);
   const nextMonthTransactionsAsync = useExpenseQuery(nextMonth);
@@ -107,6 +145,7 @@ function ResumePage() {
               (e: Transaction) => showConfirmed || !e.confirmed
             )}
             accounts={accountsAsync.data || []}
+            confirmTransactionMutation={confirmTransactionMutation}
           />
           {renderAccountBalanceUpdated(transactionsAsync.transactions || [])}
           <MonthData
@@ -114,6 +153,7 @@ function ResumePage() {
               nextMonthTransactionsAsync.transactions || []
             ).filter((e: Transaction) => showConfirmed || !e.confirmed)}
             accounts={accountsAsync.data || []}
+            confirmTransactionMutation={confirmTransactionMutation}
           />
           {renderAccountBalanceUpdated([
             ...transactionsAsync.transactions,

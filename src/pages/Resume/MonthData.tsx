@@ -1,10 +1,13 @@
+import { UseMutationResult } from "react-query";
 import { TableCell, TableRow } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Check as CheckIcon, Close as CloseIcon } from "@mui/icons-material";
+import CircularProgress from "@mui/material/CircularProgress";
 import formatCurrency from "../../helpers/formatCurrency";
 import { Account, Transaction } from "../../models";
 
 const CellContainer = styled("div")(({ theme }) => ({
+  cursor: "pointer",
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
@@ -19,26 +22,48 @@ const ReceiptValue = styled("div")(({ theme }) => ({
   color: theme.palette.success.light,
 }));
 
-function renderExpenseAmount(expense: Transaction) {
-  const ValueComponent = expense.amount > 0 ? ReceiptValue : ExpenseValue;
-  const Icon = expense.confirmed ? CloseIcon : CheckIcon;
-  return (
-    <ValueComponent sx={{ fontWeight: expense.confirmed ? "normal" : "bold" }}>
-      <CellContainer>
-        <Icon sx={{ width: "16px" }} />
-        {formatCurrency(Math.abs(expense.amount))}
-      </CellContainer>
-    </ValueComponent>
-  );
-}
-
 function MonthData({
   transactions,
   accounts,
+  confirmTransactionMutation,
 }: {
   transactions: Array<Transaction>;
   accounts: Array<Account>;
+  confirmTransactionMutation: UseMutationResult<
+    void,
+    unknown,
+    Transaction,
+    unknown
+  >;
 }) {
+  function renderExpenseAmount(transaction: Transaction) {
+    console.log({ transaction });
+    const ValueComponent = transaction.amount > 0 ? ReceiptValue : ExpenseValue;
+    const Icon = confirmTransactionMutation.isLoading
+      ? CircularProgress
+      : transaction.confirmed
+      ? CloseIcon
+      : CheckIcon;
+    return (
+      <ValueComponent
+        sx={{ fontWeight: transaction.confirmed ? "normal" : "bold" }}
+      >
+        {transaction.billForecast ? (
+          <div>{formatCurrency(Math.abs(transaction.amount))}</div>
+        ) : (
+          <CellContainer
+            onClick={() => {
+              if (!confirmTransactionMutation.isLoading)
+                confirmTransactionMutation.mutate(transaction);
+            }}
+          >
+            <Icon sx={{ width: "16px" }} />
+            {formatCurrency(Math.abs(transaction.amount))}
+          </CellContainer>
+        )}
+      </ValueComponent>
+    );
+  }
   return transactions.map((transaction: Transaction) => (
     <TableRow key={transaction.id}>
       <TableCell>{transaction.name}</TableCell>

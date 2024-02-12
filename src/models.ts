@@ -30,6 +30,7 @@ export type Expense = {
   installment_uuid?: string;
   confirmed: boolean;
   nubank_id?: string;
+  billForecast: boolean;
 };
 
 export type Transaction = {
@@ -39,6 +40,7 @@ export type Transaction = {
   account_id: string;
   confirmed: boolean;
   amount: number;
+  billForecast: boolean;
 };
 
 export type Receipt = {
