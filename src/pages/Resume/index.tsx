@@ -34,7 +34,7 @@ const nextMonth = dayjs().add(1, "month");
 
 function ResumePage() {
   const [showConfirmed, setShowConfirmed] = useState(false);
-  const accountsAsync = useQuery("bankAccounts", () =>
+  const accountsAsync = useQuery(constants.reactQueryKeyes.bankAccounts, () =>
     fetch(`${constants.URLS.accounts}?type=bank`)
       .then((res) => res.json())
       .then((res) => orderBy(res, ["name"], ["asc"]))

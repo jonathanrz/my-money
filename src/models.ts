@@ -40,6 +40,7 @@ export type Transaction = {
   account_id: string;
   confirmed: boolean;
   amount: number;
+  bill_id?: string;
   billForecast: boolean;
 };
 

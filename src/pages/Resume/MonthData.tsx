@@ -1,10 +1,16 @@
+import { useState } from "react";
 import { UseMutationResult } from "react-query";
 import { TableCell, TableRow } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { Check as CheckIcon, Close as CloseIcon } from "@mui/icons-material";
+import {
+  Add as AddIcon,
+  Check as CheckIcon,
+  Close as CloseIcon,
+} from "@mui/icons-material";
 import CircularProgress from "@mui/material/CircularProgress";
 import formatCurrency from "../../helpers/formatCurrency";
 import { Account, Transaction } from "../../models";
+import GenerateBillExpenseDialog from "./GenerateBillExpenseDialog";
 
 const CellContainer = styled("div")(({ theme }) => ({
   cursor: "pointer",
@@ -36,8 +42,10 @@ function MonthData({
     unknown
   >;
 }) {
+  const [billToGenerateExpense, setBillToGenerateExpense] =
+    useState<Transaction | null>(null);
+
   function renderExpenseAmount(transaction: Transaction) {
-    console.log({ transaction });
     const ValueComponent = transaction.amount > 0 ? ReceiptValue : ExpenseValue;
     const Icon = confirmTransactionMutation.isLoading
       ? CircularProgress
@@ -49,7 +57,17 @@ function MonthData({
         sx={{ fontWeight: transaction.confirmed ? "normal" : "bold" }}
       >
         {transaction.billForecast ? (
-          <div>{formatCurrency(Math.abs(transaction.amount))}</div>
+          <CellContainer
+            onClick={() => {
+              setBillToGenerateExpense({
+                ...transaction,
+                amount: -transaction.amount,
+              });
+            }}
+          >
+            <AddIcon sx={{ width: "16px" }} />
+            {formatCurrency(Math.abs(transaction.amount))}
+          </CellContainer>
         ) : (
           <CellContainer
             onClick={() => {
@@ -75,6 +93,12 @@ function MonthData({
             : null}
         </TableCell>
       ))}
+      {billToGenerateExpense && (
+        <GenerateBillExpenseDialog
+          transaction={billToGenerateExpense}
+          handleClose={() => setBillToGenerateExpense(null)}
+        />
+      )}
     </TableRow>
   ));
 }
