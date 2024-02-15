@@ -3,32 +3,34 @@ import { Button, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import AccountSelect from "../../components/AccountSelect";
-import type { GenerateBillExpenseFormValues } from "./models";
+import TransactionTypeSelect from "../../components/TransactionTypeSelect";
+import type { GenerateTransactionFormValues } from "./models";
 import { Transaction } from "../../models";
 
-interface GenerateBillExpenseFormProps {
+interface GenerateTransactionFormProps {
   transaction: Transaction;
-  onSubmit: (values: GenerateBillExpenseFormValues) => void;
+  onSubmit: (values: GenerateTransactionFormValues) => void;
 }
 
 const Container = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(3),
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gridGap: theme.spacing(3),
   padding: theme.spacing(5),
 }));
 
-function GenerateBillExpenseForm({
+export default function GenerateTransactionForm({
   transaction,
   onSubmit,
-}: GenerateBillExpenseFormProps) {
+}: GenerateTransactionFormProps) {
   const formik = useFormik({
     initialValues: {
+      type: "expense",
       date: transaction.date,
       name: transaction.name,
       account_id: transaction.account_id,
       amount: transaction.amount,
-      bill_id: transaction.bill_id || "not found",
+      bill_id: transaction.bill_id,
     },
     onSubmit,
   });
@@ -41,6 +43,11 @@ function GenerateBillExpenseForm({
           value={formik.values.date}
           onChange={(newValue) => formik.setFieldValue("date", newValue)}
           format="DD/MM/YY"
+        />
+        <TransactionTypeSelect
+          name="type"
+          value={formik.values.type}
+          onChange={formik.handleChange}
         />
         <TextField
           id="name"
@@ -72,5 +79,3 @@ function GenerateBillExpenseForm({
     </form>
   );
 }
-
-export default GenerateBillExpenseForm;

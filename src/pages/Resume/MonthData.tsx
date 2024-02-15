@@ -10,7 +10,7 @@ import {
 import CircularProgress from "@mui/material/CircularProgress";
 import formatCurrency from "../../helpers/formatCurrency";
 import { Account, Transaction } from "../../models";
-import GenerateBillExpenseDialog from "./GenerateBillExpenseDialog";
+import GenerateBillExpenseDialog from "./GenerateTransactionDialog";
 
 const CellContainer = styled("div")(({ theme }) => ({
   cursor: "pointer",

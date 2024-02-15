@@ -4,9 +4,9 @@ import { useMutation, useQueryClient } from "react-query";
 import { Transaction } from "../../models";
 import { GenerateBillExpenseFormValues } from "./models";
 import constants from "../../constants";
-import GenerateBillExpenseForm from "./GenerateBillExpenseForm";
+import GenerateTransactionForm from "./GenerateTransactionForm";
 
-export default function GenerateBillExpenseDialog({
+export default function GenerateTransactionDialog({
   transaction,
   handleClose,
 }: {
@@ -37,7 +37,7 @@ export default function GenerateBillExpenseDialog({
   return (
     <Dialog onClose={handleClose} open>
       <DialogTitle>Transaction</DialogTitle>
-      <GenerateBillExpenseForm
+      <GenerateTransactionForm
         transaction={transaction}
         onSubmit={confirmTransactionMutation.mutate}
       />

@@ -1,9 +1,10 @@
 import { Dayjs } from "dayjs";
 
-export type GenerateBillExpenseFormValues = {
+export type GenerateTransactionFormValues = {
+  type: "expense" | "receipt";
   date: Dayjs;
   name: string;
   account_id: string;
   amount: number;
-  bill_id: string;
+  bill_id?: string;
 };
