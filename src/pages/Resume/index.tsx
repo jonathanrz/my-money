@@ -21,6 +21,7 @@ import formatCurrency from "../../helpers/formatCurrency";
 import { Account, Transaction } from "../../models";
 import useExpenseQuery from "./useExpenseQuery";
 import MonthData from "./MonthData";
+import GenerateTransactionDialog from "./GenerateTransactionDialog";
 
 const ShowConfirmedCheckboxContainer = styled("div")(({ theme }) => ({
   alignItems: "center",
@@ -29,11 +30,20 @@ const ShowConfirmedCheckboxContainer = styled("div")(({ theme }) => ({
   gap: theme.spacing(1),
 }));
 
+const AccountNameButton = styled("button")(() => ({
+  background: "transparent",
+  border: "none",
+  cursor: "pointer",
+  fontSize: "16px",
+}));
+
 const currentMonth = dayjs();
 const nextMonth = dayjs().add(1, "month");
 
 function ResumePage() {
   const [showConfirmed, setShowConfirmed] = useState(false);
+  const [newTransactionData, setNewTransactionData] =
+    useState<Transaction | null>(null);
   const accountsAsync = useQuery(constants.reactQueryKeyes.bankAccounts, () =>
     fetch(`${constants.URLS.accounts}?type=bank`)
       .then((res) => res.json())
@@ -125,7 +135,21 @@ function ResumePage() {
             <TableCell></TableCell>
             {accountsAsync.data?.map((account) => (
               <TableCell key={account.id} align="right">
-                {account.name}
+                <AccountNameButton
+                  onClick={() =>
+                    setNewTransactionData({
+                      id: "",
+                      name: "",
+                      confirmed: false,
+                      billForecast: false,
+                      amount: 0,
+                      date: dayjs(),
+                      account_id: account.id,
+                    })
+                  }
+                >
+                  {account.name}
+                </AccountNameButton>
               </TableCell>
             ))}
           </TableRow>
@@ -161,6 +185,12 @@ function ResumePage() {
           ])}
         </TableBody>
       </Table>
+      {newTransactionData && (
+        <GenerateTransactionDialog
+          transaction={newTransactionData}
+          handleClose={() => setNewTransactionData(null)}
+        />
+      )}
       <ShowConfirmedCheckboxContainer>
         <Checkbox
           checked={showConfirmed}

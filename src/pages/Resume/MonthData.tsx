@@ -10,7 +10,7 @@ import {
 import CircularProgress from "@mui/material/CircularProgress";
 import formatCurrency from "../../helpers/formatCurrency";
 import { Account, Transaction } from "../../models";
-import GenerateBillExpenseDialog from "./GenerateTransactionDialog";
+import GenerateTransactionDialog from "./GenerateTransactionDialog";
 
 const CellContainer = styled("div")(({ theme }) => ({
   cursor: "pointer",
@@ -94,7 +94,7 @@ function MonthData({
         </TableCell>
       ))}
       {billToGenerateExpense && (
-        <GenerateBillExpenseDialog
+        <GenerateTransactionDialog
           transaction={billToGenerateExpense}
           handleClose={() => setBillToGenerateExpense(null)}
         />

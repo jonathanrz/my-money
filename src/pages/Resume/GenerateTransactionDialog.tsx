@@ -2,7 +2,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import { useMutation, useQueryClient } from "react-query";
 import { Transaction } from "../../models";
-import { GenerateBillExpenseFormValues } from "./models";
+import { GenerateTransactionFormValues } from "./models";
 import constants from "../../constants";
 import GenerateTransactionForm from "./GenerateTransactionForm";
 
@@ -14,22 +14,33 @@ export default function GenerateTransactionDialog({
   handleClose: () => void;
 }) {
   const queryClient = useQueryClient();
-  const confirmTransactionMutation = useMutation({
-    mutationFn: async (values: GenerateBillExpenseFormValues) => {
-      await fetch(constants.URLS.buildExpensesUrl(values.date), {
+  const generateTransactionMutation = useMutation({
+    mutationFn: async (values: GenerateTransactionFormValues) => {
+      const { type, ...params } = values;
+      const url =
+        type === "expense"
+          ? constants.URLS.buildExpensesUrl(values.date)
+          : constants.URLS.receipts;
+      await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(params),
       });
 
       queryClient.invalidateQueries({
         queryKey: constants.reactQueryKeyes.bankAccounts,
       });
-      queryClient.invalidateQueries({
-        queryKey: constants.reactQueryKeyes.generateExpenseKey(values.date),
-      });
+      if (type === "expense") {
+        queryClient.invalidateQueries({
+          queryKey: constants.reactQueryKeyes.generateExpenseKey(values.date),
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: constants.reactQueryKeyes.generateReceiptKey(values.date),
+        });
+      }
 
       handleClose();
     },
@@ -39,7 +50,7 @@ export default function GenerateTransactionDialog({
       <DialogTitle>Transaction</DialogTitle>
       <GenerateTransactionForm
         transaction={transaction}
-        onSubmit={confirmTransactionMutation.mutate}
+        onSubmit={generateTransactionMutation.mutate}
       />
     </Dialog>
   );

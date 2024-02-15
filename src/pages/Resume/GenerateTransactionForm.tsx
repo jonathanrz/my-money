@@ -58,6 +58,7 @@ export default function GenerateTransactionForm({
         <TextField
           id="amount"
           label="Amount"
+          type="number"
           value={formik.values.amount}
           onChange={formik.handleChange}
         />
