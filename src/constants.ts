@@ -17,6 +17,7 @@ const constants = {
     receipts: `${baseURL}/receipts`,
   },
   reactQueryKeyes: {
+    accounts: "accounts",
     bankAccounts: "bankAccounts",
     bills: "bills",
     categories: "categories",

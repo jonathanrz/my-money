@@ -6,8 +6,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import MainAppBar from "./components/MainAppBar";
 import MainNav from "./components/MainNav";
 import ResumePage from "./pages/Resume";
-import InvoicesPage from "./pages/Invoices";
 import ImportPage from "./pages/Import";
+import ReceiptsPage from "./pages/Receipts";
 import constants from "./constants";
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
@@ -48,8 +48,8 @@ export default function App() {
       <Main open={open}>
         <DrawerHeader />
 
-        <Route path="/invoices" component={InvoicesPage} />
         <Route path="/import" component={ImportPage} />
+        <Route path="/receipts" component={ReceiptsPage} />
         <Route path="/" component={ResumePage} />
       </Main>
     </Box>

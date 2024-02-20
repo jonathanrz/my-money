@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "react-query";
 import dayjs, { Dayjs } from "dayjs";
+import useReceiptsQuery from "../../hooks/useReceiptsQuery";
 import constants from "../../constants";
 import { Bill, Expense, Receipt, Transaction } from "../../models";
 
@@ -104,25 +105,7 @@ function useExpenseQuery(month: Dayjs) {
     }
   );
 
-  const receiptsAsync = useQuery(
-    constants.reactQueryKeyes.generateReceiptKey(month),
-    () => {
-      return fetch(`${constants.URLS.receipts}`)
-        .then((res) => res.json())
-        .then((res: Array<Receipt>) =>
-          res
-            .map((r) => ({
-              ...r,
-              date: dayjs(r.date),
-            }))
-            .filter(
-              (r) =>
-                r.date.isSameOrAfter(startOfMonth) &&
-                r.date.isSameOrBefore(endOfMonth)
-            )
-        );
-    }
-  );
+  const receiptsAsync = useReceiptsQuery(month);
 
   const expenses = useMemo(() => {
     if (!expensesAsync.data) return [];

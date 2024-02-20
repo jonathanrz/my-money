@@ -58,8 +58,8 @@ export default function MainNav({
             Icon: ViewWeekIcon,
           },
           {
-            text: "Invoices",
-            href: "/invoices",
+            text: "Receipts",
+            href: "/receipts",
             Icon: ReceiptIcon,
           },
           {
