@@ -31,15 +31,15 @@ const accounts = [
   },
   {
     id: "7",
-    name: "nubank",
+    name: "nubank CC",
   },
   {
     id: "8",
-    name: "bradesco",
+    name: "bradesco CC",
   },
   {
     id: "9",
-    name: "xp",
+    name: "xp CC",
   },
 ];
 

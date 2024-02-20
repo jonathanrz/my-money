@@ -3,6 +3,8 @@ import { Button, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import AccountSelect from "../../components/AccountSelect";
+import BillSelect from "../../components/BillSelect";
+import CategorySelect from "../../components/CategorySelect";
 import TransactionTypeSelect from "../../components/TransactionTypeSelect";
 import type { GenerateTransactionFormValues } from "./models";
 import { Transaction } from "../../models";
@@ -34,6 +36,8 @@ export default function GenerateTransactionForm({
     },
     onSubmit,
   });
+
+  console.log({ formik });
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -67,10 +71,14 @@ export default function GenerateTransactionForm({
           value={formik.values.account_id}
           onChange={formik.handleChange}
         />
-        <TextField
-          id="bill_id"
-          label="Bill ID"
-          value={formik.values.bill_id}
+        <CategorySelect
+          name="category_id"
+          value={formik.values.category_id || ""}
+          onChange={formik.handleChange}
+        />
+        <BillSelect
+          name="bill_id"
+          value={formik.values.bill_id || ""}
           onChange={formik.handleChange}
         />
         <Button color="primary" variant="contained" type="submit">

@@ -25,6 +25,7 @@ function ExpensesImport() {
           getCreditCardId(expense.credit_card?.name) ||
           null,
         bill_id: expense.bill?.id.toString() || null,
+        category_id: expense.category?.id.toString() || null,
         amount: expense.value,
         installment_count: expense.installmentCount,
         installment_number: expense.installmentNumber,

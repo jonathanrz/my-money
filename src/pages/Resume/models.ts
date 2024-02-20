@@ -7,4 +7,5 @@ export type GenerateTransactionFormValues = {
   account_id: string;
   amount: number;
   bill_id?: string;
+  category_id?: string;
 };

@@ -10,6 +10,7 @@ const constants = {
   URLS: {
     accounts: `${baseURL}/accounts`,
     bills: `${baseURL}/bills`,
+    categories: `${baseURL}/categories`,
     expenses: `${baseURL}/expenses`,
     buildExpensesUrl: (date: Dayjs) =>
       `${baseURL}/expenses-${date.year()}-${date.month() + 1}`,
@@ -17,6 +18,8 @@ const constants = {
   },
   reactQueryKeyes: {
     bankAccounts: "bankAccounts",
+    bills: "bills",
+    categories: "categories",
     generateExpenseKey: generateMonthKey("expenses"),
     generateBillsKey: generateMonthKey("bills"),
     generateReceiptKey: generateMonthKey("receipts"),
