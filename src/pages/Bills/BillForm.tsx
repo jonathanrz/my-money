@@ -9,6 +9,7 @@ import type { Bill } from "../../models";
 
 interface InputDataFormProps {
   onSubmit: (values: Bill) => void;
+  bill: Bill | null;
 }
 
 const Container = styled("div")(({ theme }) => ({
@@ -22,16 +23,17 @@ const TwoColumnsElement = styled("div")(() => ({
   gridColumn: "span 2",
 }));
 
-function InputDataForm({ onSubmit }: InputDataFormProps) {
+function InputDataForm({ onSubmit, bill }: InputDataFormProps) {
   const formik = useFormik({
     initialValues: {
-      account_id: "",
-      category_id: "",
-      due_day: 1,
-      end_date: dayjs(),
-      init_date: dayjs(),
-      name: "",
-      value: 0,
+      id: bill?.id,
+      account_id: bill?.account_id || "",
+      category_id: bill?.category_id || "",
+      due_day: bill?.due_day || 1,
+      end_date: bill?.end_date || dayjs(),
+      init_date: bill?.init_date || dayjs(),
+      name: bill?.name || "",
+      value: bill?.value || 0,
     },
     onSubmit,
   });

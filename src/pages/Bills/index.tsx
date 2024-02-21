@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { groupBy } from "lodash";
 import { styled } from "@mui/material/styles";
 import { useMutation, useQueryClient } from "react-query";
-import { Button, Dialog, DialogTitle } from "@mui/material";
+import { Box, Button, Dialog, DialogTitle } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import useAccountQuery from "../../hooks/useAccountQuery";
 import useCategoriesQuery from "../../hooks/useCategoriesQuery";
@@ -21,16 +22,18 @@ const AddButtonContainer = styled("div")(({ theme }) => ({
 
 export default function BillsPage() {
   const [openNewBillDialog, setOpenNewBillDialog] = useState(false);
+  const [editBill, setEditBill] = useState<Bill | null>(null);
   const queryClient = useQueryClient();
   const accountsAsync = useAccountQuery();
   const billsAsync = useBillsQuery();
   const categoriesAsync = useCategoriesQuery();
 
-  const newBill = useMutation({
+  const updateBill = useMutation({
     mutationFn: async (bill: Bill) => {
-      console.log({ bill });
-      await fetch(`${constants.URLS.bills}`, {
-        method: "POST",
+      let url = constants.URLS.bills;
+      if (bill.id) url += `/${bill.id}`;
+      await fetch(url, {
+        method: bill.id ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -42,6 +45,7 @@ export default function BillsPage() {
       });
 
       setOpenNewBillDialog(false);
+      setEditBill(null);
     },
   });
 
@@ -108,19 +112,31 @@ export default function BillsPage() {
       field: "id",
       headerName: "Actions",
       type: "number",
-      width: 150,
+      width: 250,
       renderCell: (params) => (
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<DeleteIcon />}
-          onClick={() => {
-            if (confirm("Are you sure?"))
-              deleteBill.mutate(params.value as string);
-          }}
-        >
-          Delete
-        </Button>
+        <>
+          <Box marginRight={2}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<EditIcon />}
+              onClick={() => setEditBill(params.row as Bill)}
+            >
+              Edit
+            </Button>
+          </Box>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<DeleteIcon />}
+            onClick={() => {
+              if (confirm("Are you sure?"))
+                deleteBill.mutate(params.value as string);
+            }}
+          >
+            Delete
+          </Button>
+        </>
       ),
     },
   ];
@@ -136,10 +152,16 @@ export default function BillsPage() {
           New Bill
         </Button>
       </AddButtonContainer>
-      {openNewBillDialog && (
-        <Dialog open onClose={() => setOpenNewBillDialog(false)}>
+      {(openNewBillDialog || editBill) && (
+        <Dialog
+          open
+          onClose={() => {
+            setOpenNewBillDialog(false);
+            setEditBill(null);
+          }}
+        >
           <DialogTitle>New Bill</DialogTitle>
-          <BillForm onSubmit={newBill.mutate} />
+          <BillForm onSubmit={updateBill.mutate} bill={editBill} />
         </Dialog>
       )}
       <DataGrid rows={billsAsync.data || []} columns={columns} />
