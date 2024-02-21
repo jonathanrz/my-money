@@ -7,6 +7,7 @@ import MainAppBar from "./components/MainAppBar";
 import MainNav from "./components/MainNav";
 import ResumePage from "./pages/Resume";
 import ImportPage from "./pages/Import";
+import ExpensesPage from "./pages/Expenses";
 import ReceiptsPage from "./pages/Receipts";
 import constants from "./constants";
 
@@ -50,6 +51,7 @@ export default function App() {
 
         <Route path="/import" component={ImportPage} />
         <Route path="/receipts" component={ReceiptsPage} />
+        <Route path="/expenses" component={ExpensesPage} />
         <Route path="/" component={ResumePage} />
       </Main>
     </Box>

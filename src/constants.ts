@@ -21,6 +21,7 @@ const constants = {
     bankAccounts: "bankAccounts",
     bills: "bills",
     categories: "categories",
+    generateMonthExpenseKey: generateMonthKey("month-expenses"),
     generateExpenseKey: generateMonthKey("expenses"),
     generateBillsKey: generateMonthKey("bills"),
     generateReceiptKey: generateMonthKey("receipts"),

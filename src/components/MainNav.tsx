@@ -8,6 +8,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
+import PaidIcon from "@mui/icons-material/Paid";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -56,6 +57,11 @@ export default function MainNav({
             text: "Resume",
             href: "/",
             Icon: ViewWeekIcon,
+          },
+          {
+            text: "Expenses",
+            href: "/expenses",
+            Icon: PaidIcon,
           },
           {
             text: "Receipts",

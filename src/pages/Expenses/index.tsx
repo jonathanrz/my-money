@@ -7,19 +7,19 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import useAccountQuery from "../../hooks/useAccountQuery";
-import useReceiptsQuery from "../../hooks/useReceiptsQuery";
+import useExpensesQuery from "../../hooks/useExpensesQuery";
 import formatCurrency from "../../helpers/formatCurrency";
 import constants from "../../constants";
 
-export default function ReceiptsPage() {
+export default function ExpensesPage() {
   const queryClient = useQueryClient();
   const [month, setMonth] = useState<Dayjs>(dayjs());
   const accountsAsync = useAccountQuery();
-  const receiptsAsync = useReceiptsQuery(month);
+  const expensesAsync = useExpensesQuery(month);
 
-  const deleteReceipt = useMutation({
+  const deleteExpense = useMutation({
     mutationFn: async (id: string) => {
-      await fetch(`${constants.URLS.receipts}/${id}`, {
+      await fetch(`${constants.URLS.buildExpensesUrl(month)}/${id}`, {
         method: "DELETE",
       });
 
@@ -41,7 +41,7 @@ export default function ReceiptsPage() {
       width: 70,
       valueFormatter: (params) => params.value.format("DD/MM"),
     },
-    { field: "name", headerName: "Name", width: 300 },
+    { field: "name", headerName: "Name", width: 350 },
     {
       field: "account_id",
       headerName: "Account",
@@ -68,7 +68,7 @@ export default function ReceiptsPage() {
           startIcon={<DeleteIcon />}
           onClick={() => {
             if (confirm("Are you sure?"))
-              deleteReceipt.mutate(params.value as string);
+              deleteExpense.mutate(params.value as string);
           }}
         >
           Delete
@@ -85,7 +85,7 @@ export default function ReceiptsPage() {
         onChange={(newValue) => setMonth(newValue as Dayjs)}
         format="MM/YY"
       />
-      <DataGrid rows={receiptsAsync.data || []} columns={columns} />
+      <DataGrid rows={expensesAsync.data || []} columns={columns} />
     </>
   );
 }

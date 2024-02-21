@@ -35,7 +35,7 @@ function useExpenseQuery(month: Dayjs) {
   const endOfMonth = month.clone().endOf("month").minute(dayjs().utcOffset());
 
   const expensesAsync = useQuery(
-    constants.reactQueryKeyes.generateExpenseKey(month),
+    constants.reactQueryKeyes.generateMonthExpenseKey(month),
     () =>
       fetch(`${constants.URLS.buildExpensesUrl(month)}`)
         .then((res) => res.json())
