@@ -36,6 +36,11 @@ export default function GenerateTransactionDialog({
         queryClient.invalidateQueries({
           queryKey: constants.reactQueryKeyes.generateExpenseKey(values.date),
         });
+        queryClient.invalidateQueries({
+          queryKey: constants.reactQueryKeyes.generateMonthExpenseKey(
+            values.date
+          ),
+        });
       } else {
         queryClient.invalidateQueries({
           queryKey: constants.reactQueryKeyes.generateReceiptKey(values.date),

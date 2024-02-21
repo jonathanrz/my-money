@@ -18,6 +18,13 @@ export type Bill = {
   value: number;
 };
 
+export type Category = {
+  display_in_month_expense: boolean;
+  forecast: number;
+  id: string;
+  name: string;
+};
+
 export type Expense = {
   id: string;
   date: Dayjs;

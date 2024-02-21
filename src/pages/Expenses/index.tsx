@@ -7,6 +7,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import useAccountQuery from "../../hooks/useAccountQuery";
+import useBillsQuery from "../../hooks/useBillsQuery";
+import useCategoriesQuery from "../../hooks/useCategoriesQuery";
 import useExpensesQuery from "../../hooks/useExpensesQuery";
 import formatCurrency from "../../helpers/formatCurrency";
 import constants from "../../constants";
@@ -15,6 +17,8 @@ export default function ExpensesPage() {
   const queryClient = useQueryClient();
   const [month, setMonth] = useState<Dayjs>(dayjs());
   const accountsAsync = useAccountQuery();
+  const billsAsync = useBillsQuery();
+  const categoriesAsync = useCategoriesQuery();
   const expensesAsync = useExpensesQuery(month);
 
   const deleteExpense = useMutation({
@@ -34,6 +38,16 @@ export default function ExpensesPage() {
     [accountsAsync.data]
   );
 
+  const bills = useMemo(
+    () => groupBy(billsAsync.data, "id"),
+    [billsAsync.data]
+  );
+
+  const categories = useMemo(
+    () => groupBy(categoriesAsync.data, "id"),
+    [categoriesAsync.data]
+  );
+
   const columns: GridColDef[] = [
     {
       field: "date",
@@ -48,6 +62,22 @@ export default function ExpensesPage() {
       width: 130,
       valueFormatter: (params) =>
         accounts[params.value] ? accounts[params.value][0].name : params.value,
+    },
+    {
+      field: "bill_id",
+      headerName: "Bill",
+      width: 130,
+      valueFormatter: (params) =>
+        bills[params.value] ? bills[params.value][0].name : params.value,
+    },
+    {
+      field: "category_id",
+      headerName: "Category",
+      width: 130,
+      valueFormatter: (params) =>
+        categories[params.value]
+          ? categories[params.value][0].name
+          : params.value,
     },
     {
       field: "amount",
