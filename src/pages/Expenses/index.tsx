@@ -28,7 +28,7 @@ export default function ExpensesPage() {
       });
 
       queryClient.invalidateQueries({
-        queryKey: constants.reactQueryKeyes.generateReceiptKey(month),
+        queryKey: constants.reactQueryKeyes.generateExpenseKey(month),
       });
     },
   });

@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import ReceiptIcon from "@mui/icons-material/Receipt";
+import PaymentsIcon from "@mui/icons-material/Payments";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import PaidIcon from "@mui/icons-material/Paid";
 import ListItem from "@mui/material/ListItem";
@@ -67,6 +68,11 @@ export default function MainNav({
             text: "Receipts",
             href: "/receipts",
             Icon: ReceiptIcon,
+          },
+          {
+            text: "Bills",
+            href: "/bills",
+            Icon: PaymentsIcon,
           },
           {
             text: "Import",

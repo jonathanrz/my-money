@@ -12,7 +12,7 @@ export type Bill = {
   category_id: string;
   due_day: number;
   end_date: string | Dayjs;
-  id: string;
+  id?: string;
   init_date: string | Dayjs;
   name: string;
   value: number;
