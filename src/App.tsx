@@ -9,6 +9,7 @@ import ResumePage from "./pages/Resume";
 import ImportPage from "./pages/Import";
 import ExpensesPage from "./pages/Expenses";
 import ReceiptsPage from "./pages/Receipts";
+import CategoriesPage from "./pages/Categories";
 import BillsPage from "./pages/Bills";
 import constants from "./constants";
 
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="/receipts" component={ReceiptsPage} />
         <Route path="/expenses" component={ExpensesPage} />
         <Route path="/bills" component={BillsPage} />
+        <Route path="/categories" component={CategoriesPage} />
         <Route path="/" component={ResumePage} />
       </Main>
     </Box>

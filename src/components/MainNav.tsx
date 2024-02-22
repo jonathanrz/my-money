@@ -9,6 +9,7 @@ import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
+import CategoryIcon from "@mui/icons-material/Category";
 import PaidIcon from "@mui/icons-material/Paid";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -73,6 +74,11 @@ export default function MainNav({
             text: "Bills",
             href: "/bills",
             Icon: PaymentsIcon,
+          },
+          {
+            text: "Category",
+            href: "/categories",
+            Icon: CategoryIcon,
           },
           {
             text: "Import",

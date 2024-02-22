@@ -21,7 +21,7 @@ export type Bill = {
 export type Category = {
   display_in_month_expense: boolean;
   forecast: number;
-  id: string;
+  id?: string;
   name: string;
 };
 
