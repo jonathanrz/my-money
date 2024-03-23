@@ -11,6 +11,7 @@ import ExpensesPage from "./pages/Expenses";
 import ReceiptsPage from "./pages/Receipts";
 import CategoriesPage from "./pages/Categories";
 import BillsPage from "./pages/Bills";
+import InvoicesPage from "./pages/Invoices";
 import constants from "./constants";
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
@@ -56,6 +57,7 @@ export default function App() {
         <Route path="/expenses" component={ExpensesPage} />
         <Route path="/bills" component={BillsPage} />
         <Route path="/categories" component={CategoriesPage} />
+        <Route path="/invoices" component={InvoicesPage} />
         <Route path="/" component={ResumePage} />
       </Main>
     </Box>

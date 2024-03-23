@@ -11,6 +11,7 @@ import PaymentsIcon from "@mui/icons-material/Payments";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import CategoryIcon from "@mui/icons-material/Category";
 import PaidIcon from "@mui/icons-material/Paid";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -69,6 +70,11 @@ export default function MainNav({
             text: "Receipts",
             href: "/receipts",
             Icon: ReceiptIcon,
+          },
+          {
+            text: "Invoices",
+            href: "/invoices",
+            Icon: CreditCardIcon,
           },
           {
             text: "Bills",

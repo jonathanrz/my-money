@@ -3,13 +3,10 @@ import { useQuery } from "react-query";
 import dayjs, { Dayjs } from "dayjs";
 import useReceiptsQuery from "../../hooks/useReceiptsQuery";
 import constants from "../../constants";
-import { Bill, Expense, Receipt, Transaction } from "../../models";
+import { Bill, Expense, Transaction } from "../../models";
 
 const NUCONTA_PJ_ACCOUNT_ID = "5";
-const NUBANK_CC_ID = "7";
-const BRADESCO_CC_ID = "8";
-const XP_CC_ID = "9";
-const CC_IDS = [NUBANK_CC_ID, BRADESCO_CC_ID, XP_CC_ID];
+const { NUBANK_CC_ID, XP_CC_ID, CC_IDS } = constants;
 
 function generateInvoiceExpense(
   expenses: Array<Expense>,
