@@ -53,7 +53,7 @@ export type Transaction = {
 };
 
 export type Receipt = {
-  id: string;
+  id?: string;
   date: Dayjs;
   name: string;
   account_id: string;

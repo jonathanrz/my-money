@@ -1,21 +1,41 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { groupBy } from "lodash";
 import { useMutation, useQueryClient } from "react-query";
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import useAccountQuery from "../../hooks/useAccountQuery";
+import { GridColDef } from "@mui/x-data-grid";
 import useReceiptsQuery from "../../hooks/useReceiptsQuery";
 import formatCurrency from "../../helpers/formatCurrency";
 import constants from "../../constants";
+import { Receipt } from "../../models";
+import CrudTable, {
+  GenerateColumnsProps,
+  GenerateFormProps,
+} from "../../components/CrudTable";
+import ReceiptsForm from "./ReceiptsForm";
 
 export default function ReceiptsPage() {
   const queryClient = useQueryClient();
   const [month, setMonth] = useState<Dayjs>(dayjs());
-  const accountsAsync = useAccountQuery();
   const receiptsAsync = useReceiptsQuery(month);
+
+  async function updateReceipt(receipt: Receipt) {
+    let url = constants.URLS.receipts;
+    if (receipt.id) url += `/${receipt.id}`;
+    await fetch(url, {
+      method: receipt.id ? "PATCH" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(receipt),
+    });
+
+    queryClient.invalidateQueries({
+      queryKey: constants.reactQueryKeyes.generateReceiptKey(receipt.date),
+    });
+  }
 
   const deleteReceipt = useMutation({
     mutationFn: async (id: string) => {
@@ -29,53 +49,73 @@ export default function ReceiptsPage() {
     },
   });
 
-  const accounts = useMemo(
-    () => groupBy(accountsAsync.data, "id"),
-    [accountsAsync.data]
-  );
+  function generateColumns({ accounts, setEditData }: GenerateColumnsProps) {
+    return [
+      {
+        field: "date",
+        headerName: "Day",
+        width: 70,
+        valueFormatter: (params) => params.value.format("DD/MM"),
+      },
+      { field: "name", headerName: "Name", width: 300 },
+      {
+        field: "account_id",
+        headerName: "Account",
+        width: 130,
+        valueFormatter: (params) =>
+          accounts[params.value] ? accounts[params.value].name : params.value,
+      },
+      {
+        field: "amount",
+        headerName: "Amount",
+        type: "number",
+        width: 130,
+        valueFormatter: (params) => formatCurrency(params.value),
+      },
+      {
+        field: "id",
+        headerName: "Actions",
+        type: "number",
+        width: 250,
+        renderCell: (params) => (
+          <>
+            <Box marginRight={2}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<EditIcon />}
+                onClick={() => setEditData(params.row as Bill)}
+              >
+                Edit
+              </Button>
+            </Box>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<DeleteIcon />}
+              onClick={() => {
+                if (confirm("Are you sure?"))
+                  deleteReceipt.mutate(params.value as string);
+              }}
+            >
+              Delete
+            </Button>
+          </>
+        ),
+      },
+    ] as GridColDef[];
+  }
 
-  const columns: GridColDef[] = [
-    {
-      field: "date",
-      headerName: "Day",
-      width: 70,
-      valueFormatter: (params) => params.value.format("DD/MM"),
-    },
-    { field: "name", headerName: "Name", width: 300 },
-    {
-      field: "account_id",
-      headerName: "Account",
-      width: 130,
-      valueFormatter: (params) =>
-        accounts[params.value] ? accounts[params.value][0].name : params.value,
-    },
-    {
-      field: "amount",
-      headerName: "Amount",
-      type: "number",
-      width: 130,
-      valueFormatter: (params) => formatCurrency(params.value),
-    },
-    {
-      field: "id",
-      headerName: "Actions",
-      type: "number",
-      width: 150,
-      renderCell: (params) => (
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<DeleteIcon />}
-          onClick={() => {
-            if (confirm("Are you sure?"))
-              deleteReceipt.mutate(params.value as string);
-          }}
-        >
-          Delete
-        </Button>
-      ),
-    },
-  ];
+  function generateForm({ dataToEdit, onDataUpdated }: GenerateFormProps) {
+    return (
+      <ReceiptsForm
+        receipt={dataToEdit}
+        onSubmit={(formData) => {
+          updateReceipt(formData).then(() => onDataUpdated());
+        }}
+      />
+    );
+  }
 
   return (
     <>
@@ -85,7 +125,11 @@ export default function ReceiptsPage() {
         onChange={(newValue) => setMonth(newValue as Dayjs)}
         format="MM/YY"
       />
-      <DataGrid rows={receiptsAsync.data || []} columns={columns} />
+      <CrudTable
+        generateColumns={generateColumns}
+        generateForm={generateForm}
+        rows={receiptsAsync.data || []}
+      />
     </>
   );
 }

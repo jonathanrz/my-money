@@ -4,13 +4,11 @@ import { Button, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import AccountSelect from "../../components/AccountSelect";
-import BillSelect from "../../components/BillSelect";
-import CategorySelect from "../../components/CategorySelect";
-import type { Expense } from "../../models";
+import type { Receipt } from "../../models";
 
-interface ExpenseFormProps {
-  onSubmit: (values: Expense) => void;
-  expense: Expense | null;
+interface ReceiptFormProps {
+  onSubmit: (values: Receipt) => void;
+  receipt: Receipt | null;
 }
 
 const Container = styled("div")(({ theme }) => ({
@@ -24,18 +22,15 @@ const TwoColumnsElement = styled("div")(() => ({
   gridColumn: "span 2",
 }));
 
-function ExpenseForm({ onSubmit, expense }: ExpenseFormProps) {
+function ReceiptsForm({ onSubmit, receipt }: ReceiptFormProps) {
   const formik = useFormik({
     initialValues: {
-      id: expense?.id,
-      account_id: expense?.account_id || "",
-      bill_id: expense?.bill_id || "",
-      category_id: expense?.category_id || "",
-      date: expense?.date || dayjs(),
-      name: expense?.name || "",
-      amount: expense?.amount || 0,
-      confirmed: expense?.confirmed || false,
-      billForecast: expense?.billForecast || false,
+      id: receipt?.id,
+      account_id: receipt?.account_id || "",
+      date: receipt?.date || dayjs(),
+      name: receipt?.name || "",
+      amount: receipt?.amount || 0,
+      confirmed: receipt?.confirmed || false,
     },
     onSubmit,
   });
@@ -70,16 +65,6 @@ function ExpenseForm({ onSubmit, expense }: ExpenseFormProps) {
           value={formik.values.account_id || ""}
           onChange={formik.handleChange}
         />
-        <BillSelect
-          name="bill_id"
-          value={formik.values.bill_id || ""}
-          onChange={formik.handleChange}
-        />
-        <CategorySelect
-          name="category_id"
-          value={formik.values.category_id || ""}
-          onChange={formik.handleChange}
-        />
         <Button color="primary" variant="contained" type="submit">
           Submit
         </Button>
@@ -88,4 +73,4 @@ function ExpenseForm({ onSubmit, expense }: ExpenseFormProps) {
   );
 }
 
-export default ExpenseForm;
+export default ReceiptsForm;
