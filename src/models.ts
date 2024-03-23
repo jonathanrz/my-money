@@ -26,11 +26,12 @@ export type Category = {
 };
 
 export type Expense = {
-  id: string;
+  id?: string;
   date: Dayjs;
   name: string;
   account_id?: string;
   bill_id?: string;
+  category_id?: string;
   amount: number;
   installment_count?: number;
   installment_number?: string;

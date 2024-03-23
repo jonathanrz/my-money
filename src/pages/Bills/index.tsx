@@ -10,7 +10,7 @@ import type { Bill } from "../../models";
 import BillForm from "./BillForm";
 import CrudTable, {
   GenerateColumnsProps,
-  GenerateFromProps,
+  GenerateFormProps,
 } from "../../components/CrudTable";
 
 export default function BillsPage() {
@@ -120,7 +120,7 @@ export default function BillsPage() {
     ] as GridColDef[];
   }
 
-  function generateForm({ dataToEdit, onDataUpdated }: GenerateFromProps) {
+  function generateForm({ dataToEdit, onDataUpdated }: GenerateFormProps) {
     return (
       <BillForm
         bill={dataToEdit}

@@ -21,7 +21,7 @@ export interface GenerateColumnsProps {
   setEditData: (data: any) => void;
 }
 
-export interface GenerateFromProps {
+export interface GenerateFormProps {
   dataToEdit: any;
   onDataUpdated: () => void;
 }
@@ -33,7 +33,7 @@ export default function CrudTable<Data>({
 }: {
   rows: Array<Data>;
   generateColumns: (props: GenerateColumnsProps) => GridColDef[];
-  generateForm: (props: GenerateFromProps) => ReactNode;
+  generateForm: (props: GenerateFormProps) => ReactNode;
 }) {
   const [openNewDataDialog, setOpenNewDataDialog] = useState(false);
   const [editData, setEditData] = useState<Data | null>(null);
